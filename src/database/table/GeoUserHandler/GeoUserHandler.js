@@ -84,8 +84,6 @@ class GeoUserHandler {
             }
         }
 
-
-
         try {
             const usernameCursor = await geoUserTable
                 .select('username')
@@ -99,14 +97,16 @@ class GeoUserHandler {
         } catch (err) {
             console.log(err);
 
-            //-1 is returned halted due to some other exception
+            //UnknownException halted due to some other exception
             throw new UnknownException(err);
         }
 
         if (usernameRowResult) {
+
             //useranme is returned when username, password is matched in database
             return usernameRowResult[0];
         } else {
+            
             //UserNotFoundException thrown when username or password does not match in database
             throw new InvalidCredentials();
         }
@@ -150,8 +150,6 @@ class GeoUserHandler {
 
 
     }
-
-
 
     //sets the _databaseHandler object to null
     _resetDatabaseHandler() {
