@@ -1,13 +1,19 @@
-const serverApp = require('express')();
+const express = require('express');
 
 const cookieSession = require('cookie-session');
+
+const uuidv4 = require('uuid').v4;
+
+const { ServerPathInitilizer } = require('./ServerPathInitilizer');
+
+const serverApp = express();
 
 const port = 3000;
 
 //using express json middleware
-app.use(express.json());
+serverApp.use(express.json());
 
-app.use(cookieSession({
+serverApp.use(cookieSession({
     name: 'geochatserver',
     keys: [uuidv4(), uuidv4(), uuidv4()],
     path: '/',
@@ -17,6 +23,18 @@ app.use(cookieSession({
     overwrite: true
 }));
 
-serverApp.listen(8080);
+const { logInResolver } = require('./PathResolver/LoginResolver/loginResolver');
+const { logOutResolver } = require('./PathResolver/LogOutResolver/logOutResolver');
+serverApp.get('/logIn', logInResolver);
+serverApp.post('/logOut', logOutResolver);
+
+
+//initlize all paths
+//ServerPathInitilizer.initAllPaths();
+
+
+serverApp.listen(port, () => {
+    console.log(`SERVER STARTED ON ${port}`)
+});
 
 module.exports.serverApp = serverApp;
