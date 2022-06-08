@@ -2,7 +2,7 @@ const databaseConfig = require('../../Config');
 
 const UserNotFoundException = require('./exception/UserNotFoundException');
 
-class GeoUser {
+class GeoUserHandler {
     _databaseHandler;
 
     static getHandler() {
@@ -32,12 +32,50 @@ class GeoUser {
         return await dHandler.schema.getTable(databaseConfig.schema.table.geoUser);
     }
 
-    addUser(username, password) {
+    createUser(username, password) {
 
     }
 
     validateUser(username, password) {
+        //password accepted as clear text
 
+        let usercredTable = await this._table();
+
+        try {
+            const useridResultRow = await this._getUserId(username);
+
+            const usernameCursor = await usercredTable
+                .select('username')
+                .where('user_id = :userid and password = :password')
+                .bind('userid', useridResultRow)
+                .bind('password', password)
+                .execute();
+
+            //gets the first result row
+            const usernameRowResult = await usernameCursor.fetchOne();
+
+            if (usernameRowResult) {
+
+                //1 returned when username, password is matched in database
+                return 1;
+            } else {
+
+                //0 is returned when username or password does not match in database
+                return 0;
+            }
+
+        } catch (err) {
+            console.log(err);
+
+            //rethrows UserNotFoundException
+            if (err instanceof UserNotFoundException) {
+
+                throw err;
+            }
+
+            //-1 is returned halted due to some other exception
+            return -1;
+        }
     }
 
     exits(username) {
@@ -78,4 +116,4 @@ class GeoUser {
     }
 }
 
-module.exports.GeoUserTable = GeoUserTable;
+module.exports.GeoUserHandler = GeoUserHandler;

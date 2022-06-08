@@ -8,12 +8,16 @@ const databaseConfig = {
     schema: {
         name: 'GEOCHATSERVER',
         table: {
-            geoUser: 'GEOUSER',
-            topic: 'TOPIC',
-            subtopic: 'SUBTOPIC',
-            subtopicMetaDiscuss: 'SUBTOPIICMETADISCUSS'
+            GEOUSER: 'GEOUSER',
+            TOPIC: 'TOPIC',
+            SUBTOPIC: 'SUBTOPIC',
+            SUBTOPIICMETADISCUSS: 'SUBTOPIICMETADISCUSS'
         }
     }
 }
 
+//freezing databaseConfig object from further modifications
+Object.freeze(databaseConfig);
+
+//exporting databaseConfig object
 module.exports.databaseConfig = databaseConfig;
