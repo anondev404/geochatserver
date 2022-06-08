@@ -22,16 +22,15 @@ serverApp.use(cookieSession({
     signed: true,
     overwrite: true
 }));
-
+/*
 const { logInResolver } = require('./PathResolver/LoginResolver/loginResolver');
 const { logOutResolver } = require('./PathResolver/LogOutResolver/logOutResolver');
 serverApp.get('/logIn', logInResolver);
-serverApp.post('/logOut', logOutResolver);
+serverApp.post('/logOut', logOutResolver);*/
 
 
 //initlize all paths
-//ServerPathInitilizer.initAllPaths();
-
+ServerPathInitilizer.initAllPaths(serverApp);
 
 serverApp.listen(port, () => {
     console.log(`SERVER STARTED ON ${port}`)

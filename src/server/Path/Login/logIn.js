@@ -2,7 +2,7 @@ const { GeoUserHandler } = require('../../../database/table/GeoUser/GeoUserHandl
 
 const { UserNotFoundException } = require('../../../database/table/GeoUser/exception/GeoUserHandlerException');
 
-async function logInResolver(req, res) {
+async function logIn(req, res) {
     const cred = req.body;
     console.log(cred.username);
     try {
@@ -42,4 +42,4 @@ async function logInResolver(req, res) {
     }
 }
 
-module.exports.logInResolver = logInResolver; 
+module.exports.logIn = logIn; 

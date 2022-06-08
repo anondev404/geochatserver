@@ -1,54 +1,32 @@
-const serverApp = require("./Server").serverApp;
-
-const pathResolver = require('./PathResolver/PathResolver');
+const { logIn, logOut } = require('./Path/PathResolver');
 
 class ServerPathInitilizer {
+    _serverApp;
 
-    login() {
-        serverApp.get('/logIn', pathResolver.logInResolver);
+    constructor(serverApp) {
+        console.log('------------------------------')
+        console.log(serverApp)
+        this._serverApp = serverApp;
     }
 
-    logOut() {
-        //serverApp.get('/logOut',)
-    }
-
-
-    getTopic() {
-        //serverApp.get('/getTopic/{topicId}'),
-
-    }
-
-    addTopic() {
-        // serverApp.post('/addTopic',)
-
+    signIn() {
+        this._serverApp.get('/signIn', logIn);
     }
 
 
-    getSubtopic() {
-        //  serverApp.get('/addMetaDiscussion')
-    }
-
-    addSubtopic() {
-        //  serverApp.get('/addSubTopic',)
-
-    }
-
-    getMetaDiscussion() {
-
-    }
-
-    addMetaDiscussion() {
-
+    signUp() {
+        this._serverApp.post('/signUp', logOut);
     }
 
     _init() {
-        this.login();
+        this.signIn();
+        this.signUp();
     }
 
 
     //initilizes all paths
-    static initAllPaths() {
-        const serverPathInitilizer = new ServerPathInitilizer();
+    static initAllPaths(serverApp) {
+        const serverPathInitilizer = new ServerPathInitilizer(serverApp);
 
         serverPathInitilizer._init();
     }
