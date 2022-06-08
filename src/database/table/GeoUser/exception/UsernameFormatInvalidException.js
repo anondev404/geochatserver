@@ -1,7 +1,7 @@
-const _usernameFormatInvalidMessage = "Username format is invalid.";
+const _message = "Username format is invalid.";
 class UsernameFormatInvalidException extends Error {
     constructor() {
-        super(_usernameFormatInvalidMessage);
+        super(_message);
     }
 }
 
