@@ -1,25 +1,20 @@
-const express = require('express');
+const serverApp = require('express')();
 
-const session = require('express-session');
-
-const serverApp = express();
+const cookieSession = require('cookie-session');
 
 const port = 3000;
 
 //using express json middleware
 app.use(express.json());
 
-app.use(session({
+app.use(cookieSession({
     name: 'geochatserver',
-    secret: uuidv5('www.mygeochatserver.com', uuidv5.URL),
-    genid: () => {
-        return uuidv4();
-    },
-    cookie: {
-        path: '/',
-        maxAge: 604800000,
-        httpOnly: true,
-    }
+    keys: [uuidv4(), uuidv4(), uuidv4()],
+    path: '/',
+    maxAge: 604800000,
+    httpOnly: true,
+    signed: true,
+    overwrite: true
 }));
 
 serverApp.listen(8080);
