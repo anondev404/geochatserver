@@ -15,8 +15,8 @@ constraint username_un unique key(username)
 
 create table if not exists GEOPOINT(
 plus_code varchar(20),
-lattitude numeric(9,6) not null,
-longitude numeric(9,6) not null,
+lattitude numeric(17,14) not null,
+longitude numeric(17,14) not null,
 constraint plus_code_pk primary key(plus_code)
 );
 

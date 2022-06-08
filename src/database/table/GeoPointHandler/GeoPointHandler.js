@@ -134,11 +134,14 @@ class _GeoPointHandler {
                 }
             }
         }
+
+        await this._closeConnection();
     }
 
 
     async getNearestCoordinate() {
-        console.log(this.getPlusCode());
+        //TODO: close database connection
+        //console.log(this.getPlusCode());
         let geoPointTable = await this._table();
 
         try {
@@ -151,7 +154,7 @@ class _GeoPointHandler {
             let coor;
             let isInRange;
 
-            do {
+            while (true) {
                 /*
                 plusCode ---> coor[0]
                 lattitude ---> coor[1]
@@ -176,9 +179,11 @@ class _GeoPointHandler {
                         //then it is safe to add in database
                         return coor;
                     }
-                }
 
-            } while (coorCursor.nextResult())
+                } else {
+                    break;
+                }
+            }
 
             console.log('lat %d lon %d is not in range with no other coordinate', this._lattitude, this._longitude);
 
@@ -188,8 +193,6 @@ class _GeoPointHandler {
             console.log(err);
 
             throw err;
-        } finally {
-            //await this._closeConnection();
         }
     }
 
@@ -213,6 +216,12 @@ class _GeoPointHandler {
 //22.348136850549547, 87.33220278810084 in-range
 //22.351084477836352, 87.33420568724297 in-range
 //22.354359921272135, 87.33568090220645 not-in-range
-const handler = new _GeoPointHandler(22.351084477836352, 87.33420568724297);
+//22.35900360027107, 87.33486020237099 not-in-range
+const handler = new _GeoPointHandler(22.35900360027107, 87.33486020237099);
 
-handler.createGeoPoint();
+//handler.createGeoPoint();
+
+let dis = handler.distanceInMetersBtwCoordinates(22.3476586, 87.3314167, 22.35900360027107, 87.33486020237099);
+console.log(dis);
+
+handler.getNearestCoordinate();
