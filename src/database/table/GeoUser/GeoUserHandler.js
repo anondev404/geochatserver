@@ -2,7 +2,7 @@ const { databaseConfig } = require('../../Config');
 
 const { DatabaseHandler } = require('../../DatabaseHandler');
 
-const { UserNotFoundException } = require('./exception/GeoUserHandlerException');
+const { UserNotFoundException, UserAlreadyExistsException } = require('./exception/GeoUserHandlerException');
 
 class GeoUserHandler {
     _databaseHandler;
@@ -75,8 +75,9 @@ class GeoUserHandler {
 
             if (err.info) {
                 if (err.info.code === 1062) {
+
                     //acct info already exits in database
-                    return 0;
+                    throw new UserAlreadyExistsException();
                 }
             }
 
