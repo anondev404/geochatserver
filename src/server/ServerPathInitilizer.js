@@ -1,4 +1,4 @@
-const { signIn, signUp } = require('./Path/PathResolver');
+const { signIn, signUp, signOut } = require('./Path/PathResolver');
 
 
 class ServerPathInitilizer {
@@ -17,9 +17,14 @@ class ServerPathInitilizer {
         this._serverApp.post('/signUp', signUp);
     }
 
+    signOut() {
+        this._serverApp.get('/signOut', signOut);
+    }
+
     _init() {
         this.signIn();
         this.signUp();
+        this.signOut();
     }
 
 
