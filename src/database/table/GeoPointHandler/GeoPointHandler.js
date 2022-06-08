@@ -8,7 +8,7 @@ const { databaseConfig } = require('../../Config');
 22.3476586, 87.3314167
 */
 
-class _GeoPointHandler {
+class GeoPointHandler {
     _lattitude;
     _longitude;
 
@@ -86,6 +86,29 @@ class _GeoPointHandler {
         }
 
         return true;
+    }
+
+    static async checkIfGeoPointExists(plusCode) {
+        const geoPointHandler = new GeoPointHandler();
+
+        let geoPointTable = await geoPointHandler._table();
+
+        const coorCursor = await geoPointTable
+            .select('plus_code', 'lattitude', 'longitude')
+            .where('plus_code = :plusCode')
+            .bind('plusCode', plusCode)
+            .execute();
+
+        const tallyPlusCode = coorCursor.fetchOne();
+
+        if (tallyPlusCode) {
+            if (tallyPlusCode[0] === plusCode) {
+                return true;
+            }
+        }
+
+        geoPointHandler._closeConnection();
+        return false;
     }
 
 
@@ -211,6 +234,9 @@ class _GeoPointHandler {
         }
     }
 }
+
+module.exports.GeoPointHandler = GeoPointHandler;
+
 //22.3476586, 87.3314167 start
 //22.347660459650296, 87.33144038255718 in-range
 //22.348136850549547, 87.33220278810084 in-range
