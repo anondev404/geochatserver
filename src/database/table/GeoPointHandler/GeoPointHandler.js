@@ -108,8 +108,8 @@ class _GeoPointHandler {
 
         if (nearestCoor === 1) {
 
-            //already in range with coordinate nearestCoor[1], nearestCoor[2]
-            return 1;
+            //already in range with coordinate nearestCoor[0] plus code, nearestCoor[1] lat, nearestCoor[2] lon
+            return nearestCoor;
         } else {
             if (nearestCoor === -1) {
                 try {
@@ -217,11 +217,14 @@ class _GeoPointHandler {
 //22.351084477836352, 87.33420568724297 in-range
 //22.354359921272135, 87.33568090220645 not-in-range
 //22.35900360027107, 87.33486020237099 not-in-range
-const handler = new _GeoPointHandler(22.35900360027107, 87.33486020237099);
+/*
+//debug code
+const handler = new _GeoPointHandler(22.3574557795339, 87.32971393712405);
 
-//handler.createGeoPoint();
+handler.createGeoPoint();
 
 let dis = handler.distanceInMetersBtwCoordinates(22.3476586, 87.3314167, 22.35900360027107, 87.33486020237099);
 console.log(dis);
 
 handler.getNearestCoordinate();
+*/
