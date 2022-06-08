@@ -122,7 +122,7 @@ class _GeoPointHandler {
 
                     await dHandler.session.commit();
 
-                    return 1;
+                    return [this.getPlusCode(), this._lattitude, this._longitude];
                 } catch (err) {
                     console.log(err);
 
