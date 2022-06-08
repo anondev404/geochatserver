@@ -1,4 +1,4 @@
-const { UsernameFormatInvalidException } = require("./exception/UsernameFormatInvalidException");
+const { UsernameFormatInvalidException } = require("./GeoUserHandlerException/UsernameFormatInvalidException");
 
 //valid username must satisfy this _regex
 const _regex = "/^[a-z\d.]{5,}$/i";

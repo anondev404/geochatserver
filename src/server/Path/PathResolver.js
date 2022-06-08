@@ -1,5 +1,5 @@
-const { logIn } = require('./Login/logIn');
-const { logOut } = require('./LogOut/logOut');
+const { signIn } = require('./SignIn/signIn');
+const { signUp } = require('./SignUp/signUp');
 
-module.exports.logIn = logIn;
-module.exports.logOut = logOut;
+module.exports.signIn = signIn;
+module.exports.signUp = signUp;

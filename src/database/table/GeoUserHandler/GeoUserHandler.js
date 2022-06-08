@@ -2,7 +2,9 @@ const { databaseConfig } = require('../../Config');
 
 const { DatabaseHandler } = require('../../DatabaseHandler');
 
-const { UserNotFoundException, UserAlreadyExistsException } = require('./exception/GeoUserHandlerException');
+const { UserNotFoundException, UserAlreadyExistsException } = require('./GeoUserHandlerException/GeoUserHandlerException');
+
+const { UnknownException } = require('../GlobalDatabaseTableHandlerException/UnknownException');
 
 class GeoUserHandler {
     _databaseHandler;
@@ -84,7 +86,7 @@ class GeoUserHandler {
             await dHandler.session.rollback();
 
             //on other reasonn acct creation failure
-            return -1;
+            throw new UnknownException(err);
         } finally {
             await this._closeConnection();
         }
