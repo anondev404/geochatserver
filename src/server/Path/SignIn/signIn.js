@@ -1,6 +1,6 @@
 const { GeoUserHandler } = require('../../../database/table/GeoUserHandler/GeoUserHandler');
 
-const { UserNotFoundException } = require('../../../database/table/GeoUserHandler/GeoUserHandlerException/GeoUserHandlerException');
+const { UserNotFoundException, InvalidCredentials } = require('../../../database/table/GeoUserHandler/GeoUserHandlerException/GeoUserHandlerException');
 const { UnknownException } = require('../../../database/table/GlobalDatabaseTableHandlerException/UnknownException');
 
 async function signIn(req, res) {
@@ -25,7 +25,7 @@ async function signIn(req, res) {
             });
 
             return;
-        } else if (err instanceof UnknownException) {
+        } else if (err instanceof InvalidCredentials) {
             res.send({
                 message: err.message
             });

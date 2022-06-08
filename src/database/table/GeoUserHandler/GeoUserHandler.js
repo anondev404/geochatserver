@@ -99,6 +99,9 @@ class GeoUserHandler {
 
             //UnknownException halted due to some other exception
             throw new UnknownException(err);
+        } finally {
+
+            await this._closeConnection();
         }
 
         if (usernameRowResult) {
@@ -106,7 +109,7 @@ class GeoUserHandler {
             //useranme is returned when username, password is matched in database
             return usernameRowResult[0];
         } else {
-            
+
             //UserNotFoundException thrown when username or password does not match in database
             throw new InvalidCredentials();
         }
