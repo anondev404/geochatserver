@@ -2,7 +2,7 @@ const { databaseConfig } = require('../../Config');
 
 const { DatabaseHandler } = require('../../DatabaseHandler');
 
-const { UserNotFoundException, UserAlreadyExistsException } = require('./GeoUserHandlerException/GeoUserHandlerException');
+const { UserNotFoundException, UserAlreadyExistsException, InvalidCredentials } = require('./GeoUserHandlerException/GeoUserHandlerException');
 
 const { UnknownException } = require('../GlobalDatabaseTableHandlerException/UnknownException');
 
@@ -36,7 +36,6 @@ class GeoUserHandler {
         return await dHandler.schema.getTable(databaseConfig.schema.table.GEOUSER);
     }
 
-
     //checks if user exists in database and returs it's user id
     async exits(username) {
         const geoUserTable = await this._table();
@@ -50,9 +49,69 @@ class GeoUserHandler {
         //gets the first result row
         const useridResultRow = await useridCursor.fetchOne();
 
-        //user id
-        return useridResultRow;
+        if (useridResultRow) {
+            //user id
+            return useridResultRow[0];
+        } else {
+
+            //user id row does not exists
+            return null;
+        }
     }
+
+    async getUserId(username) {
+        const userId = await this.exits(username);
+        if (userId) {
+
+            //returns user id if user is found
+            return userId;
+        }
+
+        throw new UserNotFoundException();
+    }
+
+    async validateUser(username, password) {
+        //TODO: password accepted as clear text
+
+        let userId;
+        let usernameRowResult;
+        let geoUserTable = await this._table();
+
+        try { userId = await this.getUserId(username); }
+        catch (err) {
+            if (err instanceof UserNotFoundException) {
+                throw err;
+            }
+        }
+
+
+
+        try {
+            const usernameCursor = await geoUserTable
+                .select('username')
+                .where('user_id = :userid and password = :password')
+                .bind('userid', userId)
+                .bind('password', password)
+                .execute();
+
+            //gets the first result row
+            usernameRowResult = await usernameCursor.fetchOne();
+        } catch (err) {
+            console.log(err);
+
+            //-1 is returned halted due to some other exception
+            throw new UnknownException(err);
+        }
+
+        if (usernameRowResult) {
+            //useranme is returned when username, password is matched in database
+            return usernameRowResult[0];
+        } else {
+            //UserNotFoundException thrown when username or password does not match in database
+            throw new InvalidCredentials();
+        }
+    }
+
 
     async createUser(username, password) {
         console.log('creating user');
@@ -92,60 +151,7 @@ class GeoUserHandler {
 
     }
 
-    async validateUser(username, password) {
-        //TODO: password accepted as clear text
 
-        let geoUserTable = await this._table();
-
-        try {
-            let userId = this.getUserId(username);
-
-            const usernameCursor = await geoUserTable
-                .select('username')
-                .where('user_id = :userid and password = :password')
-                .bind('userid', userId)
-                .bind('password', password)
-                .execute();
-
-            //gets the first result row
-            const usernameRowResult = await usernameCursor.fetchOne();
-
-            if (usernameRowResult) {
-
-                //useranme is returned when username, password is matched in database
-                return usernameRowResult[0];
-            } else {
-
-                //UserNotFoundException thrown when username or password does not match in database
-                throw new UserNotFoundException();
-            }
-
-        } catch (err) {
-            console.log(err);
-
-            //rethrows UserNotFoundException if caught
-            if (err instanceof UserNotFoundException) {
-
-                throw err;
-            }
-
-            //-1 is returned halted due to some other exception
-            return -1;
-        }
-    }
-
-
-    async getUserId(username) {
-        const userId = await this.exits(username);
-
-        if (userId) {
-
-            //returns user id if user is found
-            return userId;
-        }
-
-        throw new UserNotFoundException();
-    }
 
     //sets the _databaseHandler object to null
     _resetDatabaseHandler() {
