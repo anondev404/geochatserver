@@ -6,23 +6,23 @@ async function signUp(req, res) {
     const cred = req.body;
 
     try {
-        let flag = await GeoUserHandler.getHandler().createUser(cred.username, cred.password);
+        await GeoUserHandler.getHandler().createUser(cred.username, cred.password);
 
         res.send({
             message: 'Account Created'
         });
     } catch (err) {
-        console.log(err);
+        //console.log(err);
 
         if (err instanceof UserAlreadyExistsException) {
             res.send({
                 message: 'Account already exits'
             });
+        } else {
+            res.send({
+                message: 'OOPS! cannot create your account'
+            });
         }
-
-        res.send({
-            message: 'OOPS! cannot create your account'
-        });
     }
 }
 

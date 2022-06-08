@@ -59,37 +59,37 @@ class GeoUserHandler {
         let geoUserTable = await this._table();
 
         const dHandler = await this._getDatabaseHandler();
-        await dHandler.session.startTransaction();
 
-        try {
-            //todo: username, password not parsed
-            const sqlRes = await geoUserTable
-                .insert('username', 'password')
-                .values(username, password)
-                .execute();
+        if (await this.exits(username)) {
 
-            await dHandler.session.commit();
+            throw new UserAlreadyExistsException();
+        } else {
+            await dHandler.session.startTransaction();
 
-            //on acct created
-            return 1;
-        } catch (err) {
-            console.log(err);
+            try {
+                //todo: username, password not parsed
+                const sqlRes = await geoUserTable
+                    .insert('username', 'password')
+                    .values(username, password)
+                    .execute();
 
-            if (err.info) {
-                if (err.info.code === 1062) {
+                await dHandler.session.commit();
 
-                    //acct info already exits in database
-                    throw new UserAlreadyExistsException();
-                }
+                //on acct created
+                return 1;
+            } catch (err) {
+                console.log(err);
+
+                await dHandler.session.rollback();
+
+                //on other reasonn acct creation failure
+                throw new UnknownException(err);
+            } finally {
+                await this._closeConnection();
             }
-
-            await dHandler.session.rollback();
-
-            //on other reasonn acct creation failure
-            throw new UnknownException(err);
-        } finally {
-            await this._closeConnection();
         }
+
+
     }
 
     async validateUser(username, password) {
