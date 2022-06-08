@@ -9,6 +9,7 @@ const databaseConfig = {
         name: 'GEOCHATSERVER',
         table: {
             GEOUSER: 'GEOUSER',
+            GEOPOINT: 'GEOPOINT',
             TOPIC: 'TOPIC',
             SUBTOPIC: 'SUBTOPIC',
             SUBTOPIICMETADISCUSS: 'SUBTOPIICMETADISCUSS'

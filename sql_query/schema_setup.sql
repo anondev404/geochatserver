@@ -1,3 +1,6 @@
+#WARNING HERE
+drop database GEOCHATSERVER;
+
 create database if not exists GEOCHATSERVER;
 
 use GEOCHATSERVER;
@@ -13,7 +16,7 @@ constraint username_un unique key(username)
 create table if not exists GEOPOINT(
 plus_code varchar(20),
 lattitude numeric(9,6) not null,
-longitute numeric(9,6) not null,
+longitude numeric(9,6) not null,
 constraint plus_code_pk primary key(plus_code)
 );
 
@@ -47,10 +50,6 @@ constraint sender_id_fk foreign key(sender_id) references GEOUSER(user_id),
 constraint receiver_id_fk foreign key(receiver_id) references GEOUSER(user_id)
 );
 
-
-
-#WARNING HERE
-drop database GEOCHATSERVER;
 
 
 

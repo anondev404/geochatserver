@@ -11,7 +11,7 @@ class DatabaseHandler {
         await this._setClient();
         await this._setSession();
         await this._setSchema();
-        console.log('database initilized');
+        //console.log('database initilized');
     }
 
     //sets the client with req config like pool size
@@ -31,9 +31,9 @@ class DatabaseHandler {
     async _setSession() {
         try {
             this._session = await this.client.getSession(databaseConfig.connection);
-            console.log('session initilized');
+            //console.log('session initilized');
         } catch (err) {
-            console.error('failed: session not initilized');
+            //console.error('failed: session not initilized');
         }
     }
 
@@ -41,9 +41,9 @@ class DatabaseHandler {
     async _setSchema() {
         try {
             this._schema = await this.session.getSchema(databaseConfig.schema.name);
-            console.log('schema fetched');
+            //console.log('schema fetched');
         } catch (err) {
-            console.error('failed: schema could not be fetched');
+            //console.error('failed: schema could not be fetched');
         }
     }
 
@@ -68,7 +68,7 @@ class DatabaseHandler {
         let handler = new DatabaseHandler();
         await handler._init();
 
-        console.log('databasehandler initilized');
+        //console.log('databasehandler initilized');
 
         return handler;
     }
