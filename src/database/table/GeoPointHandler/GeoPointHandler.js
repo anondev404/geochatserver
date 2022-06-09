@@ -88,7 +88,7 @@ class GeoPointHandler {
         return true;
     }
 
-    static async checkIfGeoPointExists(plusCode) {
+    static async checkIfGeoPointExistsWithPlusCode(plusCode) {
         const geoPointHandler = new GeoPointHandler();
 
         let geoPointTable = await geoPointHandler._table();

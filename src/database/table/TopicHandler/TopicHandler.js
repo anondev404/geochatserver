@@ -4,6 +4,7 @@ const { GeoPointHandler } = require('../GeoPointHandler/GeoPointHandler');
 
 const { databaseConfig } = require('../../Config');
 
+//TODO: exception handling
 class TopicHandler {
     _databaseHandler;
 
@@ -45,13 +46,9 @@ class TopicHandler {
         return await dHandler.schema.getTable(databaseConfig.schema.table.TOPIC);
     }
 
-    //topic can be created by supplining the plusCode(coordinate) nearest to user fetched from database
-    //or supplining the location lattitude, longitude 
-    async createTopic(lattitude, longitude) {
-        let geoPointTable = await this._table();
-
+    async settleGeoPointPLusCode(lattitude, longitude) {
         if (this._geoPointPlusCode) {
-            let isPlusCodeExists = await GeoPointHandler.checkIfGeoPointExists(this._geoPointPlusCode);
+            let isPlusCodeExists = await GeoPointHandler.checkIfGeoPointExistsWithPlusCode(this._geoPointPlusCode);
 
             if (!isPlusCodeExists) {
                 if (lattitude && longitude) {
@@ -61,7 +58,7 @@ class TopicHandler {
 
                     this._geoPointPlusCode = nearestCoor[0];
                 } else {
-                    console.log('TopicHandler: createTopic ---> could not create topic');
+                    console.log('TopicHandler: createTopic(lattitude, longitude) ---> COULD NOT CREATE TOPIC');
 
                     //topic could not be created as plusCode did not match in database
                     //lattitude and longitutde is not supplied either
@@ -70,18 +67,41 @@ class TopicHandler {
             }
         }
 
-        const dHandler = await this._getDatabaseHandler();
+        //geoPoint is settled either by verifying or fetching it from database
+        return 1;
+    }
 
-        await dHandler.session.startTransaction();
+    //topic can be created by passing the plusCode(coordinate) nearest to user fetched from database
+    //or passing the location lattitude, longitude 
+    async createTopic(lattitude, longitude) {
+        const isGeoPointPlusCodeSettled = await this.settleGeoPointPLusCode(lattitude, longitude);
 
-        const sqlRes = await geoPointTable
-            .insert('plus_code', 'topic_title')
-            .values(this._geoPointPlusCode, this._topicTitle)
-            .execute();
+        //GeoPoint settled
+        if (isGeoPointPlusCodeSettled === 1) {
+            let geoPointTable = await this._table();
 
-        await dHandler.session.commit();
+            const dHandler = await this._getDatabaseHandler();
 
-        this._closeConnection();
+            await dHandler.session.startTransaction();
+
+            const sqlRes = await geoPointTable
+                .insert('plus_code', 'topic_title')
+                .values(this._geoPointPlusCode, this._topicTitle)
+                .execute();
+
+            await dHandler.session.commit();
+
+            this._closeConnection();
+            return 1;
+        } else {
+
+            //failed to settle GeoPoint
+            if (isGeoPointPlusCodeSettled === -1) {
+
+                return -1;
+            }
+        }
+
     }
 
     //sets the _databaseHandler object to null
