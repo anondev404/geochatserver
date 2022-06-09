@@ -1,10 +1,19 @@
 async function signOut(req, res) {
-    req.session = null;
+    if (req.session.username) {
+        req.session = null;
+
+        res.send({
+            isSuccess: true,
+            message: 'User signed out'
+        });
+
+        return;
+    }
 
     res.send({
-        isSuccess: true,
-        message: 'User signed out'
-    });
+        isSuccess: false,
+        message: "User unidentified!"
+    })
 }
 
 module.exports.signOut = signOut;
