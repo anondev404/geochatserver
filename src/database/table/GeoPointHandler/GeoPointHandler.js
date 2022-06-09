@@ -247,11 +247,12 @@ module.exports.GeoPointHandler = GeoPointHandler;
 //22.35900360027107, 87.33486020237099 not-in-range
 
 //debug code
+/*
 const handler = new GeoPointHandler(22.35900360027107, 87.33486020237099);
 
 handler.createGeoPoint();
 handler.release();
-/*
+
 let dis = handler.distanceInMetersBtwCoordinates(22.3476586, 87.3314167, 22.35900360027107, 87.33486020237099);
 console.log(dis);
 

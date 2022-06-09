@@ -135,7 +135,8 @@ class TopicHandler {
     }
 }
 
-
+//debug code
+/*
 const geoPointHandler = new GeoPointHandler(22.365239488966406, 87.32984310749357);
 
 geoPointHandler.getNearestCoordinate().then(async (nearestCoor) => {
@@ -150,7 +151,7 @@ geoPointHandler.getNearestCoordinate().then(async (nearestCoor) => {
 });
 
 
-/*
+
 const topicHandler = new TopicHandler('just a topic for debugging purpose', '7MJ9985M+JP');
 
 topicHandler.createTopic();
