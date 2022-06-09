@@ -15,9 +15,10 @@ class GeoPointHandler {
     _databaseHandler;
 
     constructor(lattitude, longitude, databaseHandler) {
-        this._databaseHandler = databaseHandler;
+
         this._lattitude = lattitude;
         this._longitude = longitude;
+        this._databaseHandler = databaseHandler;
     }
 
     async _getDatabaseHandler() {

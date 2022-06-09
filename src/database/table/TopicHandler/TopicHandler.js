@@ -14,11 +14,8 @@ class TopicHandler {
     _geoPointPlusCode;
 
     //geoPointPlusCode is main GEOPOINT coordinate plus_code from database
-    constructor(topicTitle, geoPointPlusCode, databaseHandler) {
-        if (!topicTitle) throw Error('Topic title(is falsy) has to be passed to TopicHandler constructor.');
-
-        this._topicTitle = topicTitle;
-        this._geoPointPlusCode = geoPointPlusCode;
+    constructor(databaseHandler) {
+        this._databaseHandler = databaseHandler;
     }
 
     async _getDatabaseHandler() {
@@ -54,89 +51,92 @@ class TopicHandler {
     }
 
     //optional: lattitude, longitude - if plus code node passed in constructor
-    async settleGeoPointPLusCode(lattitude, longitude) {
+    async settleGeoPointPLusCode(geoPointPlusCode, coordinate) {
         let isPlusCodeExists = null;
+        let settledPlusCode = null;
 
-        if (this._geoPointPlusCode) {
-            isPlusCodeExists = await GeoPointHandler.checkIfGeoPointExistsWithPlusCode(this._geoPointPlusCode);
+        if (geoPointPlusCode) {
+            isPlusCodeExists = await GeoPointHandler.checkIfGeoPointExistsWithPlusCode(geoPointPlusCode);
+            settledPlusCode = geoPointPlusCode;
         }
 
         if (!isPlusCodeExists) {
-            if (lattitude > 0 && longitude > 0) {
+            if (coordinate) {
+                if (coordinate.lat > 0 && coordinate.lon > 0) {
 
-                const dHandler = await this._getDatabaseHandler();
-                const geoPointHandler = new GeoPointHandler(lattitude, longitude, dHandler);
-                const nearestCoor = await geoPointHandler.createGeoPoint();
+                    const dHandler = await this._getDatabaseHandler();
+                    const geoPointHandler = new GeoPointHandler(coordinate.lat, coordinate.lon, dHandler);
+                    const nearestCoor = await geoPointHandler.createGeoPoint();
 
-                this._geoPointPlusCode = nearestCoor[0];
+                    settledPlusCode = nearestCoor[0];
 
-                console.log(`TopicHandler: --> settleGeoPointPLusCode: Creating plus_code form coordinates [${lattitude}, ${longitude}]`)
+                    console.log(`TopicHandler: --> settleGeoPointPLusCode: Creating plus_code form coordinates [${coordinate.lat}, ${coordinate.lon}]`);
+                }
             } else {
                 console.log('TopicHandler: settleGeoPointPLusCode ---> PLUS_CODE Could not be settled');
 
                 //topic could not be created as plusCode did not match in database
                 //lattitude and longitutde is not supplied either
-                return -1;
+                return { plusCode: null, isSettled: false };
             }
         }
+
 
         //geoPoint is settled: either by creating or by verifying and fetching it from database
-        return 1;
+        return { plusCode: settledPlusCode, isSettled: true };
     }
 
-    //optional: lattitude, longitude - if plus code node passed in constructor
+    //optional: coordinate = {lat, lon} - if plus code node passed in constructor
     //topic can be created by passing the plusCode(coordinate) nearest to user fetched from database
     //or passing the location lattitude, longitude 
-    async createTopic(lattitude, longitude) {
-        const isGeoPointPlusCodeSettled = await this.settleGeoPointPLusCode(lattitude, longitude);
+    async createTopic(topicTitle, { geoPointPlusCode, coordinate }) {
+        if (typeof topicTitle !== 'string') throw Error('Topic title must be passed as string');
+
+        const settledGeoPointPlusCode = await this.settleGeoPointPLusCode(geoPointPlusCode, coordinate);
         //console.debug(`TopicHandler: ---> createTopic: Is GeoPoint PlusCode SETTLED - ${isGeoPointPlusCodeSettled}`);
-        //console.debug(`TopicHandler: ---> createTopic: PLUSCODE >>> ${this._geoPointPlusCode}`);
+        //console.debug(`TopicHandler: ---> createTopic: PLUSCODE >>> ${geoPointPlusCode}`);
 
-        //GeoPoint settled
-        if (isGeoPointPlusCodeSettled === 1) {
-            const session = await this.getSession();
-            const topicTable = await this._table();
+        if (settledGeoPointPlusCode) {
+            //GeoPoint settled
+            if (settledGeoPointPlusCode.isSettled) {
+                const session = await this.getSession();
+                const topicTable = await this._table();
 
-            await session.startTransaction();
+                await session.startTransaction();
 
-            const sqlRes = await topicTable
-                .insert('plus_code', 'topic_title')
-                .values(this._geoPointPlusCode, this._topicTitle)
-                .execute();
+                const sqlRes = await topicTable
+                    .insert('plus_code', 'topic_title')
+                    .values(settledGeoPointPlusCode.plusCode, topicTitle)
+                    .execute();
 
-            await session.commit();
+                await session.commit();
 
-            return this._geoPointPlusCode;
-        } else {
-
-            //failed to settle GeoPoint
-            if (isGeoPointPlusCodeSettled === -1) {
-
+                return settledGeoPointPlusCode.plusCode;
+            } else {
+                //failed to settle GeoPoint
                 return -1;
             }
         }
     }
 
     //optional: lattitude, longitude - if plus code node passed in constructor
-    async fetchAllTopic(lattitude, longitude) {
-        const isGeoPointPlusCodeSettled = await this.settleGeoPointPLusCode(lattitude, longitude);
+    async fetchAllTopic({ geoPointPlusCode, coordinate }) {
+        const settledGeoPointPlusCode = await this.settleGeoPointPLusCode(geoPointPlusCode, coordinate);
 
-        //GeoPoint plus code settled
-        if (isGeoPointPlusCodeSettled === 1) {
-            const topicTable = await this._table();
+        if (settledGeoPointPlusCode) {
+            //GeoPoint plus code settled
+            if (settledGeoPointPlusCode.isSettled) {
+                const topicTable = await this._table();
 
-            const topicCursor = await topicTable
-                .select('topic_id', 'topic_title')
-                .where('plus_code = :plusCode')
-                .bind('plusCode', this._geoPointPlusCode)
-                .execute();
+                const topicCursor = await topicTable
+                    .select('topic_id', 'topic_title')
+                    .where('plus_code = :plusCode')
+                    .bind('plusCode', settledGeoPointPlusCode.plusCode)
+                    .execute();
 
-            return topicCursor.fetchAll();
-        } else {
-
-            //failed to settle GeoPoint plus code 
-            if (isGeoPointPlusCodeSettled === -1) {
-
+                return topicCursor.fetchAll();
+            } else {
+                //failed to settle GeoPoint plus code 
                 return null;
             }
         }
@@ -175,29 +175,36 @@ class TopicHandler {
     }
 }
 
+module.exports.TopicHandler = TopicHandler;
+
 //debug code
 /*
+let topicHandler;
+
 const geoPointHandler = new GeoPointHandler(22.365239488966406, 87.32984310749357);
 
 geoPointHandler.getNearestCoordinate().then(async (nearestCoor) => {
     //7MJ9985M+JP is-not-present-database
     await geoPointHandler.release();
 
-    const topicHandler = new TopicHandler('just a topic for debugging purpose', '7MJ9985M+JP');
+    topicHandler = new TopicHandler();
 
-    await topicHandler.createTopic(22.365239488966406, 87.32984310749357);
+    //'7MJ9985M+JP'
+    //coordinate: { lat: 22.365239488966406, lon: 87.32984310749357 } 
+    await topicHandler.createTopic('1 just a topic for debugging purpose', { geoPointPlusCode: '7MJ9985M+JW' });
 
     topicHandler.release();
 });
 
 
+topicHandler = new TopicHandler();
 
-const topicHandler = new TopicHandler('just a topic for debugging purpose', '7MJ9988H+3W');
-
-topicHandler.fetchAllTopic().then(async (topics) => {
+topicHandler.fetchAllTopic({ geoPointPlusCode: '7MJ9988H+3W' }).then(async (topics) => {
     console.log(topics);
     await topicHandler.release();
 });
+
+topicHandler = new TopicHandler();
 topicHandler.isTopicExists(3).then(async (count) => {
     console.log(count);
     await topicHandler.release();
