@@ -1,4 +1,4 @@
-const { signIn, signUp, signOut } = require('./Path/PathResolver');
+const { signIn, signUp, signOut, createTopic, fetchTopic } = require('./Path/PathResolver');
 
 
 class ServerPathInitilizer {
@@ -21,10 +21,20 @@ class ServerPathInitilizer {
         this._serverApp.get('/signOut', signOut);
     }
 
+    createTopic() {
+        this._serverApp.post('/create/topic', createTopic);
+    }
+
+    fetchTopic() {
+        this._serverApp.get('/fetch/topic', fetchTopic);
+    }
+
     _init() {
         this.signIn();
         this.signUp();
         this.signOut();
+        this.createTopic();
+        this.fetchTopic();
     }
 
 

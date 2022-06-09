@@ -4,16 +4,19 @@ const { UserNotFoundException, InvalidCredentials } = require('../../../database
 const { UnknownException } = require('../../../database/table/GlobalDatabaseTableHandlerException/UnknownException');
 
 async function signIn(req, res) {
-    const cred = req.body;
+    const info = req.body;
+    console.log(info.location);
     try {
         const geoUserHandler = GeoUserHandler.getHandler();
 
-        const username = await geoUserHandler.validateUser(cred.username, cred.password);
+        const username = await geoUserHandler.validateUser(info.username, info.password);
 
         geoUserHandler.release();
 
         //saving the username in session data
-        req.session.username = cred.username;
+        req.session.username = info.username;
+
+        req.session.location = info.location;
 
         res.send({
             isSuccess: true,
@@ -21,7 +24,7 @@ async function signIn(req, res) {
         });
 
     } catch (err) {
-        //console.log(err);
+        console.log(err);
 
         //user to send message does not exits
         if (err instanceof UserNotFoundException) {

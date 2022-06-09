@@ -136,10 +136,10 @@ class TopicHandler {
 
                 await session.commit();
 
-                return { isSettled: true, plusCode: settledGeoPointPlusCode.plusCode };
+                return { isCreated: true, plusCode: settledGeoPointPlusCode.plusCode };
             } else {
                 //failed to settle GeoPoint
-                return { isSettled: false, plusCode: null };
+                return { isCreated: false, plusCode: null };
             }
         }
     }
