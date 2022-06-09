@@ -10,6 +10,10 @@ const { databaseConfig } = require('../../Config');
 class SubTopicHandler {
     _databaseHandler;
 
+    /**
+     * 
+     * @param {DatabaseHandler} databaseHandler 
+     */
     constructor(databaseHandler) {
         this._databaseHandler = databaseHandler;
     }
@@ -46,12 +50,24 @@ class SubTopicHandler {
         return schema.getTable(databaseConfig.schema.table.SUBTOPIC);
     }
 
+    /**
+     * 
+     * @param {number} topicId 
+     * @returns 
+     */
     async verifyTopicId(topicId) {
         const topicHandler = new TopicHandler(this._databaseHandler);
 
         return await topicHandler.isTopicExists(topicId);
     }
 
+    /**
+     * 
+     * @param {number} topicId 
+     * @param {string} subTopicTitle 
+     * @param {string} subTopicDescription 
+     * @returns 
+     */
     async createSubTopic(topicId, subTopicTitle, subTopicDescription) {
         const isTopicIdExists = await this.verifyTopicId(topicId);
 
@@ -94,7 +110,7 @@ class SubTopicHandler {
 }
 
 //debug code
-
+/*
 let subTopicHandler;
 
 subTopicHandler = new SubTopicHandler();
@@ -107,3 +123,4 @@ subTopicHandler.createSubTopic(topicId, 'hello world', 'lasjafsdllasjdf;asjd;f')
 
         await subTopicHandler.release();
     });
+*/

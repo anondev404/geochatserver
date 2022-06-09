@@ -13,7 +13,10 @@ class TopicHandler {
     _topicTitle;
     _geoPointPlusCode;
 
-    //geoPointPlusCode is main GEOPOINT coordinate plus_code from database
+    /**
+     * 
+     * @param {DatabaseHandler} databaseHandler 
+     */
     constructor(databaseHandler) {
         this._databaseHandler = databaseHandler;
     }
@@ -50,7 +53,12 @@ class TopicHandler {
         return schema.getTable(databaseConfig.schema.table.TOPIC);
     }
 
-    //optional: lattitude, longitude - if plus code node passed in constructor
+    /**
+     * 
+     * @param {string} geoPointPlusCode 
+     * @param {Object} coordinate {lat: lattitude, lon: longitude} 
+     * @returns
+     */
     async settleGeoPointPLusCode(geoPointPlusCode, coordinate) {
         let isPlusCodeExists = null;
         let settledPlusCode = null;
@@ -86,9 +94,14 @@ class TopicHandler {
         return { plusCode: settledPlusCode, isSettled: true };
     }
 
-    //optional: coordinate = {lat, lon} - if plus code node passed in constructor
-    //topic can be created by passing the plusCode(coordinate) nearest to user fetched from database
-    //or passing the location lattitude, longitude 
+    /**
+     * 
+     * @param {int} topicTitle 
+     * @param {Object} geoPoint should contain plus_code or coordinate
+     * @param {string} geoPoint.geoPointPlusCode if not passed coordinate should be passed
+     * @param {Object} [geoPoint.coordinate] is optional if plus_code passed
+     * @returns 
+     */
     async createTopic(topicTitle, { geoPointPlusCode, coordinate }) {
         if (typeof topicTitle !== 'string') throw Error('Topic title must be passed as string');
 
@@ -119,7 +132,13 @@ class TopicHandler {
         }
     }
 
-    //optional: lattitude, longitude - if plus code node passed in constructor
+    /**
+     * 
+     * @param {Object} geoPoint should contain plus_code or coordinate
+     * @param {string} geoPoint.geoPointPlusCode if not passed coordinate should be passed
+     * @param {Object} geoPoint.coordinate is optional if plus_code passed
+     * @returns 
+     */
     async fetchAllTopic({ geoPointPlusCode, coordinate }) {
         const settledGeoPointPlusCode = await this.settleGeoPointPLusCode(geoPointPlusCode, coordinate);
 
@@ -142,6 +161,11 @@ class TopicHandler {
         }
     }
 
+    /**
+     * 
+     * @param {number} topicId 
+     * @returns 
+     */
     async isTopicExists(topicId) {
         const topicTable = await this._table();
 
