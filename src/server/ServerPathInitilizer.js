@@ -1,5 +1,6 @@
 const { signIn, signUp, signOut, createTopic, fetchTopic } = require('./Path/PathResolver');
 
+const { sessionValidation } = require('./Middleware/Middleware');
 
 class ServerPathInitilizer {
     _serverApp;
@@ -18,15 +19,15 @@ class ServerPathInitilizer {
     }
 
     signOut() {
-        this._serverApp.get('/signOut', signOut);
+        this._serverApp.get('/signOut', sessionValidation, signOut);
     }
 
     createTopic() {
-        this._serverApp.post('/create/topic', createTopic);
+        this._serverApp.post('/create/topic', sessionValidation, createTopic);
     }
 
     fetchTopic() {
-        this._serverApp.get('/fetch/topic', fetchTopic);
+        this._serverApp.get('/fetch/topic', sessionValidation, fetchTopic);
     }
 
     _init() {

@@ -13,4 +13,4 @@ const sessionValidation = (req, res, next) => {
     });
 }
 
-module.export.sessionValidation = sessionValidation;
+module.exports.sessionValidation = sessionValidation;
