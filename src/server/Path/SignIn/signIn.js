@@ -9,7 +9,7 @@ async function signIn(req, res) {
         const geoUserHandler = GeoUserHandler.getHandler();
 
         const username = await geoUserHandler.validateUser(cred.username, cred.password);
-        
+
         geoUserHandler.release();
 
         //saving the username in session data

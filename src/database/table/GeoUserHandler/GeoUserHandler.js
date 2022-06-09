@@ -42,7 +42,7 @@ class GeoUserHandler {
     async _table() {
         const schema = await this.getSchema();
 
-        return schema.getTable(databaseConfig.schema.table.TOPIC);
+        return schema.getTable(databaseConfig.schema.table.GEOUSER);
     }
 
     static getHandler(databaseHandler) { return new GeoUserHandler(databaseHandler); };
@@ -87,15 +87,18 @@ class GeoUserHandler {
         let userId;
         let usernameRowResult;
         let geoUserTable = await this._table();
+       
 
         try { userId = await this.getUserId(username); }
         catch (err) {
+
             if (err instanceof UserNotFoundException) {
                 throw err;
             }
         }
-
+        
         try {
+            
             const usernameCursor = await geoUserTable
                 .select('username')
                 .where('user_id = :userid and password = :password')
@@ -105,6 +108,7 @@ class GeoUserHandler {
 
             //gets the first result row
             usernameRowResult = await usernameCursor.fetchOne();
+            
         } catch (err) {
             console.log(err);
 
