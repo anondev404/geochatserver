@@ -1,17 +1,14 @@
 const mysqlx = require('@mysql/xdevapi');
 const { databaseConfig } = require('./Config');
 
-//Database handler manages the connection to the database
-class DatabaseHandler {
+class _DatabaseClientHandler {
     _client;
-    _session;
-    _schema;
 
-    async _init() {
+    static _databaseClientHandler;
+
+    async init() {
         await this._setClient();
-        await this._setSession();
-        await this._setSchema();
-        //console.log('database initilized');
+
     }
 
     //sets the client with req config like pool size
@@ -27,33 +24,77 @@ class DatabaseHandler {
         );
     }
 
-    //sets the session by getting a connection from the pool
-    async _setSession() {
-        try {
-            this._session = await this.client.getSession(databaseConfig.connection);
-            //console.log('session initilized');
-        } catch (err) {
-            //console.error('failed: session not initilized');
+    static async getHandler() {
+        if (_DatabaseClientHandler._databaseClientHandler) {
+            return _DatabaseClientHandler._databaseClientHandler;
         }
+
+        await _DatabaseClientHandler.setHandler();
+
+        return _DatabaseClientHandler._databaseClientHandler;
     }
 
-    //intilizes the schema GEOCHATSERVER database
-    async _setSchema() {
-        try {
-            this._schema = await this.session.getSchema(databaseConfig.schema.name);
-            //console.log('schema fetched');
-        } catch (err) {
-            //console.error('failed: schema could not be fetched');
-        }
+    static async setHandler() {
+        const databaseClientHandler = new _DatabaseClientHandler();
+        await databaseClientHandler.init();
+
+        _DatabaseClientHandler._databaseClientHandler = databaseClientHandler;
     }
 
     //gets the curren client
     get client() {
         return this._client;
     }
+}
+
+//Database handler manages the connection to the database
+class DatabaseHandler {
+    _session;
+    _schema;
+
+    async _init(client) {
+        await this._setSession(client);
+        await this._setSchema();
+        //console.log('database initilized');
+    }
+
+    //sets the session by getting a connection from the pool
+    async _setSession(client) {
+        try {
+            this._session = await client.getSession();
+        } catch (err) {
+            console.error('DatabaseHandler: ---> _setSession: FAILED SESSION NOT INIT');
+        }
+    }
+
+    //intilizes the schema GEOCHATSERVER database
+    async _setSchema() {
+        try {
+            this._schema = await this._session.getSchema(databaseConfig.schema.name);
+        } catch (err) {
+            console.error(err);
+            console.error('DatabaseHandler: ---> _setSchema: FAILED TO INIT SCHEMA');
+        }
+    }
+
+    //creates and initilizes DatabaseHandler object
+    //return the object
+    static async getHandler() {
+        let databaseClientHandler = await _DatabaseClientHandler.getHandler();
+
+        const databaseHandler = new DatabaseHandler();
+        await databaseHandler._init(databaseClientHandler.client);
+
+        return databaseHandler;
+    }
 
     //gets the current active session
-    get session() {
+    async getNewSessionFromPool() {
+        await _DatabaseClientHandler.getHandler()
+            .then(async (databaseClientHandler) => {
+                await this._setSession(databaseClientHandler.client);
+            });
+
         return this._session;
     }
 
@@ -62,15 +103,8 @@ class DatabaseHandler {
         return this._schema;
     }
 
-    //creates and initilizes DatabaseHandler object
-    //return the object
-    static async getHandler() {
-        let handler = new DatabaseHandler();
-        await handler._init();
-
-        //console.log('databasehandler initilized');
-
-        return handler;
+    get session() {
+        return this._session;
     }
 
     get isConnectionOpen() {
@@ -80,8 +114,9 @@ class DatabaseHandler {
     }
 
     async close() {
-        //release connection into connection pool
-        await this.session.close();
+
+        //realeases connection to connection pool
+        await this._session.close();
     }
 }
 

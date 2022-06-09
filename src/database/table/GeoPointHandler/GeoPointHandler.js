@@ -14,28 +14,14 @@ class GeoPointHandler {
 
     _databaseHandler;
 
-    constructor(lattitude, longitude) {
+    constructor(lattitude, longitude, databaseHandler) {
+        this._databaseHandler = databaseHandler;
         this._lattitude = lattitude;
         this._longitude = longitude;
     }
 
-
-    getPlusCode() {
-        const openLocationCode = new OpenLocationCode();
-        return openLocationCode.encode(this._lattitude, this._longitude);
-    }
-
-
-    static getHandler() {
-        return new UserHandler();
-    }
-
-
     async _getDatabaseHandler() {
         if (this._databaseHandler) {
-
-            console.log(this._databaseHandler.isConnectionOpen);
-
             if (this._databaseHandler.isConnectionOpen) {
                 return this._databaseHandler;
             }
@@ -47,14 +33,29 @@ class GeoPointHandler {
         return this._databaseHandler;
     }
 
-
-    async _table() {
-        //gets GEOPOINT table from database
+    async getSession() {
         const dHandler = await this._getDatabaseHandler();
 
-        return await dHandler.schema.getTable(databaseConfig.schema.table.GEOPOINT);
+        return dHandler.session;
     }
 
+    async getSchema() {
+        const dHandler = await this._getDatabaseHandler();
+
+        return dHandler.schema;
+    }
+
+    //gets GEOPOINT table from database
+    async _table() {
+        const schema = await this.getSchema();
+
+        return schema.getTable(databaseConfig.schema.table.GEOPOINT);
+    }
+
+    getPlusCode() {
+        const openLocationCode = new OpenLocationCode();
+        return openLocationCode.encode(this._lattitude, this._longitude);
+    }
 
     distanceInMetersBtwCoordinates(lat1, lon1, lat2, lon2) {
         const R = 6371e3; // metres
@@ -91,7 +92,7 @@ class GeoPointHandler {
     static async checkIfGeoPointExistsWithPlusCode(plusCode) {
         const geoPointHandler = new GeoPointHandler();
 
-        let geoPointTable = await geoPointHandler._table();
+        const geoPointTable = await geoPointHandler._table();
 
         const coorCursor = await geoPointTable
             .select('plus_code', 'lattitude', 'longitude')
@@ -107,15 +108,12 @@ class GeoPointHandler {
             }
         }
 
-        geoPointHandler._closeConnection();
         return false;
     }
 
 
     async createGeoPoint() {
         //console.log(this.getPlusCode());
-        let geoPointTable = await this._table();
-
         const dHandler = await this._getDatabaseHandler();
 
         let nearestCoor;
@@ -129,43 +127,43 @@ class GeoPointHandler {
 
         console.log(`nearestCoor ---> ${nearestCoor}`);
 
-        if (nearestCoor === 1) {
+        if (nearestCoor === -1) {
+            const session = await this.getSession();
+            try {
+                const geoPointTable = await this._table();
+                await session.startTransaction();
 
-            //already in range with coordinate nearestCoor[0] plus code, nearestCoor[1] lat, nearestCoor[2] lon
-            return nearestCoor;
-        } else {
-            if (nearestCoor === -1) {
-                try {
-                    await dHandler.session.startTransaction();
+                const sqlRes = await geoPointTable
+                    .insert('plus_code', 'lattitude', 'longitude')
+                    .values(this.getPlusCode(), this._lattitude, this._longitude)
+                    .execute();
 
-                    const sqlRes = await geoPointTable
-                        .insert('plus_code', 'lattitude', 'longitude')
-                        .values(this.getPlusCode(), this._lattitude, this._longitude)
-                        .execute();
 
-                    await dHandler.session.commit();
+                await session.commit();
 
-                    return [this.getPlusCode(), this._lattitude, this._longitude];
-                } catch (err) {
-                    console.log(err);
+                return [this.getPlusCode(), this._lattitude, this._longitude];
+            } catch (err) {
+                console.log(err);
 
-                    await dHandler.session.rollback();
+                await session.rollback();
 
-                    return -1;
-                } finally {
-                    await this._closeConnection();
-                }
+                return -1;
             }
         }
+        else {
+            if (nearestCoor) {
 
-        await this._closeConnection();
+                //already in range with coordinate nearestCoor[0] plus code, nearestCoor[1] lat, nearestCoor[2] lon
+                return nearestCoor;
+            }
+        }
     }
 
 
     async getNearestCoordinate() {
         //TODO: close database connection
         //console.log(this.getPlusCode());
-        let geoPointTable = await this._table();
+        const geoPointTable = await this._table();
 
         try {
             const coorCursor = await geoPointTable
@@ -233,6 +231,10 @@ class GeoPointHandler {
             console.log('closing connection uh')
         }
     }
+
+    async release() {
+        await this._closeConnection();
+    }
 }
 
 module.exports.GeoPointHandler = GeoPointHandler;
@@ -243,12 +245,13 @@ module.exports.GeoPointHandler = GeoPointHandler;
 //22.351084477836352, 87.33420568724297 in-range
 //22.354359921272135, 87.33568090220645 not-in-range
 //22.35900360027107, 87.33486020237099 not-in-range
-/*
+
 //debug code
-const handler = new _GeoPointHandler(22.3574557795339, 87.32971393712405);
+const handler = new GeoPointHandler(22.35900360027107, 87.33486020237099);
 
 handler.createGeoPoint();
-
+handler.release();
+/*
 let dis = handler.distanceInMetersBtwCoordinates(22.3476586, 87.3314167, 22.35900360027107, 87.33486020237099);
 console.log(dis);
 
