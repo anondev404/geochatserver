@@ -14,7 +14,9 @@ class TopicHandler {
     _geoPointPlusCode;
 
     //geoPointPlusCode is main GEOPOINT coordinate plus_code from database
-    constructor(_databaseHandler, { topicTitle, geoPointPlusCode }) {
+    constructor(topicTitle, geoPointPlusCode, databaseHandler) {
+        if (!topicTitle) throw Error('Topic title(is falsy) has to be passed to TopicHandler constructor.');
+
         this._topicTitle = topicTitle;
         this._geoPointPlusCode = geoPointPlusCode;
     }
@@ -86,14 +88,13 @@ class TopicHandler {
     //or passing the location lattitude, longitude 
     async createTopic(lattitude, longitude) {
         const isGeoPointPlusCodeSettled = await this.settleGeoPointPLusCode(lattitude, longitude);
-        console.debug(`TopicHandler: ---> createTopic: Is GeoPoint PlusCode SETTLED - ${isGeoPointPlusCodeSettled}`);
-        console.debug(`TopicHandler: ---> createTopic: PLUSCODE >>> ${this._geoPointPlusCode}`);
+        //console.debug(`TopicHandler: ---> createTopic: Is GeoPoint PlusCode SETTLED - ${isGeoPointPlusCodeSettled}`);
+        //console.debug(`TopicHandler: ---> createTopic: PLUSCODE >>> ${this._geoPointPlusCode}`);
 
         //GeoPoint settled
         if (isGeoPointPlusCodeSettled === 1) {
             const session = await this.getSession();
             const topicTable = await this._table();
-            console.log(`****Table Name: ${topicTable.getName()}`)
 
             await session.startTransaction();
 
@@ -143,7 +144,7 @@ geoPointHandler.getNearestCoordinate().then(async (nearestCoor) => {
 
     const topicHandler = new TopicHandler('just a topic for debugging purpose', '7MJ9985M+JP');
 
-    topicHandler.createTopic(22.365239488966406, 87.32984310749357);
+    await topicHandler.createTopic(22.365239488966406, 87.32984310749357);
 
     topicHandler.release();
 });
