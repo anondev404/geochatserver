@@ -10,16 +10,8 @@ const { databaseConfig } = require('../../Config');
 class SubTopicHandler {
     _databaseHandler;
 
-    _topicId;
-    _subTopicTitle;
-    _subTopicDescription;
-
-    constructor(topicId, subTopicTitle, subTopicDescription, databaseHandler) {
-        if (!topicId) throw Error('Topic title(is falsy) has to be passed to TopicHandler constructor.');
-
-        this._topicId = topicId;
-        this._subTopicTitle = subTopicTitle;
-        this._subTopicDescription = subTopicDescription;
+    constructor(databaseHandler) {
+        this._databaseHandler = databaseHandler;
     }
 
     async _getDatabaseHandler() {
@@ -54,13 +46,17 @@ class SubTopicHandler {
         return schema.getTable(databaseConfig.schema.table.SUBTOPIC);
     }
 
-    verifyTopicId(topicId) {
+    async verifyTopicId(topicId) {
         const topicHandler = new TopicHandler(this._databaseHandler);
 
-        return topicHandler.isTopicExists(topicId);
+        return await topicHandler.isTopicExists(topicId);
     }
 
-    async createSubTopic() {
+    async createSubTopic(topicId, subTopicTitle, subTopicDescription) {
+        const isTopicIdExists = await this.verifyTopicId(topicId);
+
+        if (!isTopicIdExists) return { isCreated: false };
+
         const session = await this.getSession();
         const topicTable = await this._table();
 
@@ -68,10 +64,12 @@ class SubTopicHandler {
 
         const sqlRes = await topicTable
             .insert('topic_id', 'sub_topic_title', 'sub_topic_description')
-            .values(this._topicId, this._subTopicTitle, this._subTopicDescription)
+            .values(topicId, subTopicTitle, subTopicDescription)
             .execute();
 
         await session.commit();
+
+        return { isCreated: true };
     }
 
     //sets the _databaseHandler object to null
@@ -94,3 +92,18 @@ class SubTopicHandler {
         await this._closeConnection();
     }
 }
+
+//debug code
+
+let subTopicHandler;
+
+subTopicHandler = new SubTopicHandler();
+
+let topicId = 2;
+
+subTopicHandler.createSubTopic(topicId, 'hello world', 'lasjafsdllasjdf;asjd;f')
+    .then(async (res) => {
+        console.debug(`TopicId: ${topicId}: - Is Subtopic created ${res.isCreated}`);
+
+        await subTopicHandler.release();
+    });

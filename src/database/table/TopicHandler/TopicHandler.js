@@ -145,13 +145,21 @@ class TopicHandler {
     async isTopicExists(topicId) {
         const topicTable = await this._table();
 
-        const topicCursor = await topicTable
+        const topicRow = await topicTable
             .select('topic_id')
             .where('topic_id = :topicId')
             .bind('topicId', topicId)
-            .execute();
+            .execute()
+            .then((topicCursor) => {
+                return topicCursor.fetchOne();
+            });
 
-        return topicCursor.fetchOne()[0];
+
+        if (topicRow) {
+            return topicRow[0];
+        }
+
+        return null;
     }
 
     //sets the _databaseHandler object to null
