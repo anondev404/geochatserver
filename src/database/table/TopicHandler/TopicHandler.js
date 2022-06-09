@@ -136,10 +136,10 @@ class TopicHandler {
 
                 await session.commit();
 
-                return settledGeoPointPlusCode.plusCode;
+                return { isSettled: true, plusCode: settledGeoPointPlusCode.plusCode };
             } else {
                 //failed to settle GeoPoint
-                return -1;
+                return { isSettled: false, plusCode: null };
             }
         }
     }
@@ -240,7 +240,8 @@ geoPointHandler.getNearestCoordinate().then(async (nearestCoor) => {
 
     //'7MJ9985M+JP'
     //coordinate: { lat: 22.365239488966406, lon: 87.32984310749357 } 
-    await topicHandler.createTopic('1 just a topic for debugging purpose', { geoPointPlusCode: '7MJ9985M+JW' });
+    const result = await topicHandler.createTopic('1sss just a topic for debugging purpose', { geoPointPlusCode: '7MJ9985M+JW' });
+    console.log(result);
 
     topicHandler.release();
 });
@@ -248,10 +249,11 @@ geoPointHandler.getNearestCoordinate().then(async (nearestCoor) => {
 
 topicHandler = new TopicHandler();
 
-topicHandler.fetchAllTopic({ geoPointPlusCode: '7MJ9988H+3W' }).then(async (topics) => {
-    console.log(topics);
-    await topicHandler.release();
-});
+topicHandler.fetchAllTopic({ geoPointPlusCode: '7MJ9988H+3W' })
+    .then(async (data) => {
+        console.log(data.data);
+        await topicHandler.release();
+    });
 
 topicHandler = new TopicHandler();
 topicHandler.isTopicExists(3).then(async (count) => {
