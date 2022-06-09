@@ -16,6 +16,7 @@ async function signIn(req, res) {
         req.session.username = cred.username;
 
         res.send({
+            isSuccess: true,
             message: `Welcome to chatserver ${req.session.username}`
         });
 
@@ -25,18 +26,21 @@ async function signIn(req, res) {
         //user to send message does not exits
         if (err instanceof UserNotFoundException) {
             res.send({
+                isSuccess: false,
                 message: err.message
             });
 
             return;
         } else if (err instanceof InvalidCredentials) {
             res.send({
+                isSuccess: false,
                 message: err.message
             });
 
             return;
         } else {
             res.send({
+                isSuccess: false,
                 message: 'OOPS! cannot signin'
             });
         }

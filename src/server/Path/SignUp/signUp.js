@@ -13,6 +13,7 @@ async function signUp(req, res) {
         geoUserHandler.release();
 
         res.send({
+            isSuccess: true,
             message: 'Account Created'
         });
     } catch (err) {
@@ -20,10 +21,12 @@ async function signUp(req, res) {
 
         if (err instanceof UserAlreadyExistsException) {
             res.send({
+                isSuccess: false,
                 message: 'Account already exits'
             });
         } else {
             res.send({
+                isSuccess: false,
                 message: 'OOPS! cannot create your account'
             });
         }
