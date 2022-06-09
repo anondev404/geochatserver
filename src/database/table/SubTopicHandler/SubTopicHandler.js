@@ -197,7 +197,7 @@ subTopicHandler.isSubTopicExists(subTopicId).then(async (id) => {
 
     await subTopicHandler.release();
 });
-*/
+
 
 subTopicHandler.fetchAllSubTopic(topicId).then(async (res) => {
     if (res.isFetched && res.data.length > 0) {
@@ -207,4 +207,4 @@ subTopicHandler.fetchAllSubTopic(topicId).then(async (res) => {
     }
 
     await subTopicHandler.release();
-});
+});*/

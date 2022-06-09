@@ -6,7 +6,11 @@ const { UnknownException } = require('../../../database/table/GlobalDatabaseTabl
 async function signIn(req, res) {
     const cred = req.body;
     try {
-        const username = await GeoUserHandler.getHandler().validateUser(cred.username, cred.password);
+        const geoUserHandler = GeoUserHandler.getHandler();
+
+        const username = await geoUserHandler.validateUser(cred.username, cred.password);
+        
+        geoUserHandler.release();
 
         //saving the username in session data
         req.session.username = cred.username;

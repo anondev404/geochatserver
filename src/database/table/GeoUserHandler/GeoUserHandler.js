@@ -9,32 +9,43 @@ const { UnknownException } = require('../GlobalDatabaseTableHandlerException/Unk
 class GeoUserHandler {
     _databaseHandler;
 
-    static getHandler() {
-        return new GeoUserHandler();
+    constructor(databaseHandler) {
+        this._databaseHandler = databaseHandler;
     }
 
     async _getDatabaseHandler() {
         if (this._databaseHandler) {
-
-            console.log(this._databaseHandler.isConnectionOpen);
-
             if (this._databaseHandler.isConnectionOpen) {
                 return this._databaseHandler;
             }
         }
 
-        //calling handler opens/fetches a connection to the database
+        //calling handler opens new connection to the database
         this._databaseHandler = await DatabaseHandler.getHandler();
 
         return this._databaseHandler;
     }
 
-    //gets GEOUSER table from database
-    async _table() {
+    async getSession() {
         const dHandler = await this._getDatabaseHandler();
 
-        return await dHandler.schema.getTable(databaseConfig.schema.table.GEOUSER);
+        return dHandler.session;
     }
+
+    async getSchema() {
+        const dHandler = await this._getDatabaseHandler();
+
+        return dHandler.schema;
+    }
+
+    //gets GEOPOINT table from database
+    async _table() {
+        const schema = await this.getSchema();
+
+        return schema.getTable(databaseConfig.schema.table.TOPIC);
+    }
+
+    static getHandler(databaseHandler) { return new GeoUserHandler(databaseHandler); };
 
     //checks if user exists in database and returs it's user id
     async exits(username) {
@@ -99,9 +110,6 @@ class GeoUserHandler {
 
             //UnknownException halted due to some other exception
             throw new UnknownException(err);
-        } finally {
-
-            await this._closeConnection();
         }
 
         if (usernameRowResult) {
@@ -120,13 +128,12 @@ class GeoUserHandler {
         console.log('creating user');
         let geoUserTable = await this._table();
 
-        const dHandler = await this._getDatabaseHandler();
-
         if (await this.exits(username)) {
 
             throw new UserAlreadyExistsException();
         } else {
-            await dHandler.session.startTransaction();
+            const session = await this.getSession();
+            await session.startTransaction();
 
             try {
                 //todo: username, password not parsed
@@ -135,23 +142,19 @@ class GeoUserHandler {
                     .values(username, password)
                     .execute();
 
-                await dHandler.session.commit();
+                await session.commit();
 
                 //on acct created
                 return 1;
             } catch (err) {
                 console.log(err);
 
-                await dHandler.session.rollback();
+                await session.rollback();
 
                 //on other reasonn acct creation failure
                 throw new UnknownException(err);
-            } finally {
-                await this._closeConnection();
             }
         }
-
-
     }
 
     //sets the _databaseHandler object to null
@@ -166,6 +169,12 @@ class GeoUserHandler {
             this._resetDatabaseHandler();
             console.log('closing connection uh')
         }
+    }
+
+    //release resources
+    //call after task complete otherwise will result in resource leaks
+    async release() {
+        await this._closeConnection();
     }
 }
 

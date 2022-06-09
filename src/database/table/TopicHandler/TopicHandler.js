@@ -227,9 +227,9 @@ class TopicHandler {
 module.exports.TopicHandler = TopicHandler;
 
 //debug code
-/*
-let topicHandler;
 
+let topicHandler;
+/*
 const geoPointHandler = new GeoPointHandler(22.365239488966406, 87.32984310749357);
 
 geoPointHandler.getNearestCoordinate().then(async (nearestCoor) => {
@@ -247,9 +247,10 @@ geoPointHandler.getNearestCoordinate().then(async (nearestCoor) => {
 });
 
 
+
 topicHandler = new TopicHandler();
 
-topicHandler.fetchAllTopic({ geoPointPlusCode: '7MJ9988H+3W' })
+topicHandler.fetchAllTopic({ geoPointPlusCode: '7MJ9985M+JW' })
     .then(async (data) => {
         console.log(data.data);
         await topicHandler.release();
@@ -259,5 +260,4 @@ topicHandler = new TopicHandler();
 topicHandler.isTopicExists(3).then(async (count) => {
     console.log(count);
     await topicHandler.release();
-});
-*/
+});*/

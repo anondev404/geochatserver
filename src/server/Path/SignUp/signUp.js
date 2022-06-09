@@ -6,7 +6,11 @@ async function signUp(req, res) {
     const cred = req.body;
 
     try {
-        await GeoUserHandler.getHandler().createUser(cred.username, cred.password);
+        const geoUserHandler = GeoUserHandler.getHandler();
+
+        await geoUserHandler.createUser(cred.username, cred.password);
+
+        geoUserHandler.release();
 
         res.send({
             message: 'Account Created'
