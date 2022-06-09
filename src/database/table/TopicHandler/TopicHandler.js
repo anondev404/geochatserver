@@ -53,6 +53,7 @@ class TopicHandler {
         return schema.getTable(databaseConfig.schema.table.TOPIC);
     }
 
+    //optional: lattitude, longitude - if plus code node passed in constructor
     async settleGeoPointPLusCode(lattitude, longitude) {
         let isPlusCodeExists = null;
 
@@ -71,7 +72,7 @@ class TopicHandler {
 
                 console.log(`TopicHandler: --> settleGeoPointPLusCode: Creating plus_code form coordinates [${lattitude}, ${longitude}]`)
             } else {
-                console.log('TopicHandler: createTopic(lattitude, longitude) ---> COULD NOT CREATE TOPIC');
+                console.log('TopicHandler: settleGeoPointPLusCode ---> PLUS_CODE Could not be settled');
 
                 //topic could not be created as plusCode did not match in database
                 //lattitude and longitutde is not supplied either
@@ -116,6 +117,43 @@ class TopicHandler {
         }
     }
 
+    //optional: lattitude, longitude - if plus code node passed in constructor
+    async fetchAllTopic(lattitude, longitude) {
+        const isGeoPointPlusCodeSettled = await this.settleGeoPointPLusCode(lattitude, longitude);
+
+        //GeoPoint plus code settled
+        if (isGeoPointPlusCodeSettled === 1) {
+            const topicTable = await this._table();
+
+            const topicCursor = await topicTable
+                .select('topic_id', 'topic_title')
+                .where('plus_code = :plusCode')
+                .bind('plusCode', this._geoPointPlusCode)
+                .execute();
+
+            return topicCursor.fetchAll();
+        } else {
+
+            //failed to settle GeoPoint plus code 
+            if (isGeoPointPlusCodeSettled === -1) {
+
+                return null;
+            }
+        }
+    }
+
+    async isTopicExists(topicId) {
+        const topicTable = await this._table();
+
+        const topicCursor = await topicTable
+            .select('topic_id')
+            .where('topic_id = :topicId')
+            .bind('topicId', topicId)
+            .execute();
+
+        return topicCursor.fetchOne()[0];
+    }
+
     //sets the _databaseHandler object to null
     _resetDatabaseHandler() {
         this._databaseHandler = null;
@@ -130,6 +168,8 @@ class TopicHandler {
         }
     }
 
+    //release resources
+    //call after task complete otherwise will result in resource leaks
     async release() {
         await this._closeConnection();
     }
@@ -152,7 +192,14 @@ geoPointHandler.getNearestCoordinate().then(async (nearestCoor) => {
 
 
 
-const topicHandler = new TopicHandler('just a topic for debugging purpose', '7MJ9985M+JP');
+const topicHandler = new TopicHandler('just a topic for debugging purpose', '7MJ9988H+3W');
 
-topicHandler.createTopic();
+topicHandler.fetchAllTopic().then(async (topics) => {
+    console.log(topics);
+    await topicHandler.release();
+});
+topicHandler.isTopicExists(3).then(async (count) => {
+    console.log(count);
+    await topicHandler.release();
+});
 */
