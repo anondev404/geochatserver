@@ -53,6 +53,18 @@ class TopicHandler {
         return schema.getTable(databaseConfig.schema.table.TOPIC);
     }
 
+    formatJson(columns) {
+        return (row) => {
+            let format = {};
+            row.forEach((rowVal, i) => {
+                format[columns[i].getColumnName()] = rowVal;
+            });
+
+            Object.freeze(format);
+            return format;
+        };
+    }
+
     /**
      * 
      * @param {string} geoPointPlusCode 
@@ -153,10 +165,15 @@ class TopicHandler {
                     .bind('plusCode', settledGeoPointPlusCode.plusCode)
                     .execute();
 
-                return topicCursor.fetchAll();
+                const columns = topicCursor.getColumns();
+
+                const dataJson = topicCursor.fetchAll().map(this.formatJson(columns));
+
+
+                return { isFetched: true, data: dataJson };
             } else {
                 //failed to settle GeoPoint plus code 
-                return null;
+                return { isFetched: false, data: null };
             }
         }
     }

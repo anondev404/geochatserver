@@ -50,6 +50,18 @@ class SubTopicHandler {
         return schema.getTable(databaseConfig.schema.table.SUBTOPIC);
     }
 
+    formatJson(columns) {
+        return (row) => {
+            let format = {};
+            row.forEach((rowVal, i) => {
+                format[columns[i].getColumnName()] = rowVal;
+            });
+
+            Object.freeze(format);
+            return format;
+        };
+    }
+
     /**
      * 
      * @param {number} topicId 
@@ -74,11 +86,11 @@ class SubTopicHandler {
         if (!isTopicIdExists) return { isCreated: false };
 
         const session = await this.getSession();
-        const topicTable = await this._table();
+        const subTopicTable = await this._table();
 
         await session.startTransaction();
 
-        const sqlRes = await topicTable
+        const sqlRes = await subTopicTable
             .insert('topic_id', 'sub_topic_title', 'sub_topic_description')
             .values(topicId, subTopicTitle, subTopicDescription)
             .execute();
@@ -86,6 +98,55 @@ class SubTopicHandler {
         await session.commit();
 
         return { isCreated: true };
+    }
+
+    /**
+     * 
+     * @param {number} topicId valid topic_id in TOPIC database
+     * @returns 
+     */
+    async fetchAllSubTopic(topicId) {
+        const isTopicIdExists = await this.verifyTopicId(topicId);
+
+        if (!isTopicIdExists) return { isFetched: false, data: null };
+
+        const subTopicTable = await this._table();
+
+        const subTopicCursor = await subTopicTable
+            .select('sub_topic_id', 'sub_topic_title', 'sub_topic_description')
+            .where('topic_id = :topicId')
+            .bind('topicId', topicId)
+            .execute();
+
+        const columns = subTopicCursor.getColumns();
+
+        const dataJson = subTopicCursor.fetchAll().map(this.formatJson(columns));
+
+        return { isFetched: true, data: dataJson };
+    }
+
+    /**
+     * 
+     * @param {number} topicId 
+     */
+    async isSubTopicExists(subTopicId) {
+        const subTopicTable = await this._table();
+
+        const subTopicRow = await subTopicTable
+            .select('sub_topic_id')
+            .where('sub_topic_id = :subTopicId')
+            .bind('subTopicId', subTopicId)
+            .execute()
+            .then((subTopicCursor) => {
+                return subTopicCursor.fetchOne();
+            });
+
+
+        if (subTopicRow) {
+            return subTopicRow[0];
+        }
+
+        return null;
     }
 
     //sets the _databaseHandler object to null
@@ -110,17 +171,40 @@ class SubTopicHandler {
 }
 
 //debug code
-/*
+
 let subTopicHandler;
 
 subTopicHandler = new SubTopicHandler();
 
+let subTopicId = 0;
 let topicId = 2;
 
+/*
 subTopicHandler.createSubTopic(topicId, 'hello world', 'lasjafsdllasjdf;asjd;f')
     .then(async (res) => {
         console.debug(`TopicId: ${topicId}: - Is Subtopic created ${res.isCreated}`);
 
         await subTopicHandler.release();
     });
+
+
+subTopicHandler.isSubTopicExists(subTopicId).then(async (id) => {
+    if (id) {
+        console.log(`SubTopic exists with id = ${id}`);
+    } else {
+        console.log(`SubTopic does not exist with id = ${id}`);
+    }
+
+    await subTopicHandler.release();
+});
 */
+
+subTopicHandler.fetchAllSubTopic(topicId).then(async (res) => {
+    if (res.isFetched && res.data.length > 0) {
+        console.log(res.data);
+    } else {
+        console.log(`No Subtopic added under topic_id: ${topicId}`);
+    }
+
+    await subTopicHandler.release();
+});
