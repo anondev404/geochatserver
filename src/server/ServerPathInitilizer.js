@@ -1,7 +1,7 @@
 const {
     signIn, signUp, signOut,
     createTopic, fetchTopic,
-    fetchSubTopic, createSubTopic
+    fetchSubTopic, createSubTopic, createSubTopicMetaDiscussion, fetchSubTopicMetaDiscussion
 } = require('./Path/PathResolver');
 
 const { sessionValidation } = require('./Middleware/Middleware');
@@ -42,6 +42,14 @@ class ServerPathInitilizer {
         this._serverApp.get('/fetch/subTopic', sessionValidation, fetchSubTopic);
     }
 
+    createSubTopicMetaDiscussion() {
+        this._serverApp.post('/create/subTopicMetaDiscussion', sessionValidation, createSubTopicMetaDiscussion);
+    }
+
+    fetchSubTopicMetaDiscussion() {
+        this._serverApp.get('/fetch/subTopicMetaDiscussion', sessionValidation, fetchSubTopicMetaDiscussion);
+    }
+
     _init() {
         this.signIn();
         this.signUp();
@@ -52,6 +60,9 @@ class ServerPathInitilizer {
 
         this.createSubTopic();
         this.fetchSubTopic();
+
+        this.createSubTopicMetaDiscussion();
+        this.fetchSubTopicMetaDiscussion();
     }
 
 

@@ -141,7 +141,7 @@ class SubTopicHandler {
             isTopicIdExists: Boolean(isTopicIdExists),
             isFetched: true,
             data: dataJson,
-            message: 'Topics fetched!'
+            message: 'Subtopic fetched!'
         };
     }
 

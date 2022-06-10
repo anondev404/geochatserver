@@ -8,7 +8,7 @@ const { GeoUserHandler } = require('../GeoUserHandler/GeoUserHandler');
 //TODO: exception handling
 //TODO: plus code regex
 ///(^|\s)([23456789C][23456789CFGHJMPQRV][23456789CFGHJMPQRVWX]{6}\+[23456789CFGHJMPQRVWX]{2,3})(\s|$)/?i
-class SubTopicMetaDiscuss {
+class SubTopicMetaDiscussHandler {
     _databaseHandler;
 
     /**
@@ -96,17 +96,16 @@ class SubTopicMetaDiscuss {
      * @param {string} message
      * @returns
      */
-    async createDiscussion(subTopicId, senderUsername, receiverUsername, message) {
+    async createDiscussion(subTopicId, senderUsername, message) {
         const isSubTopicExists = await this.verifySubTopicId(subTopicId);
 
-        let receiverId;
         const senderUserId = await this.verifyUserByUsername(senderUsername);
 
         let resFormat = {
             isSubTopicExists: null,
             meta_discuss_id: null,
             isCreated: null,
-            receiverValid: null,
+            senderValid: null,
             message: null
         }
 
@@ -114,42 +113,29 @@ class SubTopicMetaDiscuss {
             resFormat.isSubTopicExists = Boolean(isSubTopicExists);
             resFormat.meta_discuss_id = null;
             resFormat.isCreated = false;
-            resFormat.receiverValid = false;
+            resFormat.senderValid = false;
             resFormat.message = `OOPS! Subtopic dose not exists`;
 
             return resFormat;
         }
 
-        if (senderUserId) {
-            receiverId = await this.verifyUserByUsername(receiverUsername);
-            if (!receiverId) {
-                resFormat.isSubTopicExists = Boolean(isSubTopicExists);
-                resFormat.meta_discuss_id = null;
-                resFormat.isCreated = false;
-                resFormat.receiverValid = false;
-                resFormat.message = `Message could be delivered!`
-
-                return resFormat;
-            }
-        } else {
+        if (!senderUserId) {
             resFormat.isSubTopicExists = Boolean(isSubTopicExists);
             resFormat.meta_discuss_id = null;
             resFormat.isCreated = false;
-            resFormat.receiverValid = true;
+            resFormat.senderValid = true;
             resFormat.message = `Please SignIn!`
 
             return resFormat;
         }
 
         console.table([{
-            class: SubTopicMetaDiscuss.name,
+            class: SubTopicMetaDiscussHandler.name,
             method: this.createDiscussion.name,
             subTopicId: subTopicId,
             senderUsername: senderUsername,
-            receiverUsername: receiverUsername,
             isSubTopicExists: isSubTopicExists,
             senderUserId: senderUserId,
-            receiverId: receiverId
         }]);
 
 
@@ -159,8 +145,8 @@ class SubTopicMetaDiscuss {
         await session.startTransaction();
 
         const sqlRes = await metaDiscussTable
-            .insert('sub_topic_id', 'sender_id', 'receiver_id', 'message')
-            .values(subTopicId, senderUserId, receiverId, message)
+            .insert('sub_topic_id', 'sender_id', 'message')
+            .values(subTopicId, senderUserId, message)
             .execute();
 
         await session.commit();
@@ -169,7 +155,7 @@ class SubTopicMetaDiscuss {
         resFormat.isSubTopicExists = Boolean(isSubTopicExists);
         resFormat.meta_discuss_id = sqlRes.getAutoIncrementValue();
         resFormat.isCreated = true;
-        resFormat.receiverValid = true;
+        resFormat.senderValid = true;
         resFormat.message = `Message created!`
 
         return resFormat;
@@ -200,7 +186,7 @@ class SubTopicMetaDiscuss {
         const metaDiscussTable = await this._table();
 
         const metaDiscussCursor = await metaDiscussTable
-            .select('meta_discuss_id', 'sub_topic_id', 'sender_id', 'receiver_id', 'message')
+            .select('meta_discuss_id', 'sub_topic_id', 'sender_id', 'message', 'message_timestamp')
             .execute();
 
         const columns = metaDiscussCursor.getColumns();
@@ -234,16 +220,18 @@ class SubTopicMetaDiscuss {
     }
 }
 
-module.exports.SubTopicHandler = SubTopicHandler;
+module.exports.SubTopicMetaDiscussHandler = SubTopicMetaDiscussHandler;
 
 //debug code
+
+
+let metaDiscuss = new SubTopicMetaDiscussHandler();
+
 /*
 
-let metaDiscuss = new SubTopicMetaDiscuss();
-
-
-metaDiscuss.createDiscussion(2, 'abc', 'abc1', 'abc: abc1')
+metaDiscuss.createDiscussion(1, 'abc', `good topic ${new Date().getTime()}`)
     .then(async (res) => {
+        console.log(res);
 
         await metaDiscuss.release();
     });
@@ -251,7 +239,7 @@ metaDiscuss.createDiscussion(2, 'abc', 'abc1', 'abc: abc1')
 
 
 
-metaDiscuss.fetchAllMetaDiscussion(2)
+metaDiscuss.fetchAllMetaDiscussion(1)
     .then(async (res) => {
         console.log(res);
 

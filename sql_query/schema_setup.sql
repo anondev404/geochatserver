@@ -41,13 +41,11 @@ create table if not exists SUBTOPICMETADISCUSS(
 meta_discuss_id int auto_increment,
 sub_topic_id int,
 sender_id int,
-receiver_id int,
 message varchar(250) not null,
 message_timestamp timestamp default current_timestamp(),
 constraint meta_discuss_id_pk primary key(meta_discuss_id),
 constraint sub_topic_id_fk foreign key(sub_topic_id) references SUBTOPIC(sub_topic_id),
-constraint sender_id_fk foreign key(sender_id) references GEOUSER(user_id),
-constraint receiver_id_fk foreign key(receiver_id) references GEOUSER(user_id)
+constraint sender_id_fk foreign key(sender_id) references GEOUSER(user_id)
 );
 
 

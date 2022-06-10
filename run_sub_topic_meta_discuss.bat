@@ -1,2 +1,2 @@
 cls
-nodemon src\database\table\SubTopicMetaDiscuss\SubTopicMetaDiscuss.js
+nodemon src\database\table\SubTopicMetaDiscussHandler\SubTopicMetaDiscussHandler.js
