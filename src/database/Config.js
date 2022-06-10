@@ -12,7 +12,7 @@ const databaseConfig = {
             GEOPOINT: 'GEOPOINT',
             TOPIC: 'TOPIC',
             SUBTOPIC: 'SUBTOPIC',
-            SUBTOPIICMETADISCUSS: 'SUBTOPIICMETADISCUSS'
+            SUBTOPICMETADISCUSS: 'SUBTOPICMETADISCUSS'
         }
     }
 }

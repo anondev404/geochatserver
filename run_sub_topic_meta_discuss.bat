@@ -1,0 +1,2 @@
+cls
+nodemon src\database\table\SubTopicMetaDiscuss\SubTopicMetaDiscuss.js

@@ -86,7 +86,7 @@ class SubTopicHandler {
         if (!isTopicIdExists) return {
             isTopicExists: Boolean(isTopicIdExists),
             sub_topic_id: null,
-            isCreated: true,
+            isCreated: false,
             message: `OOPS! Subtopic dose not exists`
         };
 
