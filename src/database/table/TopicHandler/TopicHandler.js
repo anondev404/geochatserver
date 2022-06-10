@@ -136,10 +136,21 @@ class TopicHandler {
 
                 await session.commit();
 
-                return { isCreated: true, plusCode: settledGeoPointPlusCode.plusCode };
+                return {
+                    topic_id: sqlRes.getAutoIncrementValue(),
+                    isCreated: true,
+                    isGeoPointSettled: settledGeoPointPlusCode.isSettled,
+                    message: 'Topic created!',
+                };
             } else {
                 //failed to settle GeoPoint
-                return { isCreated: false, plusCode: null };
+                return {
+                    topic_id: null,
+                    isCreated: false,
+                    isGeoPointSettled: settledGeoPointPlusCode.isSettled,
+                    plus_code: settledGeoPointPlusCode.plusCode,
+                    message: 'Topic created!',
+                };
             }
         }
     }
@@ -170,10 +181,20 @@ class TopicHandler {
                 const dataJson = topicCursor.fetchAll().map(this.formatJson(columns));
 
 
-                return { isFetched: true, data: dataJson };
+                return {
+                    isFetched: true,
+                    isGeoPointSettled: settledGeoPointPlusCode.isSettled,
+                    data: dataJson,
+                    message: 'Topics fetched'
+                };
             } else {
                 //failed to settle GeoPoint plus code 
-                return { isFetched: false, data: null };
+                return {
+                    isFetched: false,
+                    isGeoPointSettled: settledGeoPointPlusCode.isSettled,
+                    data: null,
+                    message: 'Topics could not be fetched'
+                };
             }
         }
     }

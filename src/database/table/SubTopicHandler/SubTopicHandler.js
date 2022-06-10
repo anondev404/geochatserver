@@ -83,7 +83,12 @@ class SubTopicHandler {
     async createSubTopic(topicId, subTopicTitle, subTopicDescription) {
         const isTopicIdExists = await this.verifyTopicId(topicId);
 
-        if (!isTopicIdExists) return { isCreated: false };
+        if (!isTopicIdExists) return {
+            isTopicExists: Boolean(isTopicIdExists),
+            sub_topic_id: null,
+            isCreated: true,
+            message: `OOPS! Subtopic dose not exists`
+        };
 
         const session = await this.getSession();
         const subTopicTable = await this._table();
@@ -97,7 +102,12 @@ class SubTopicHandler {
 
         await session.commit();
 
-        return { isCreated: true };
+        return {
+            isTopicExists: Boolean(isTopicIdExists),
+            sub_topic_id: sqlRes.getAutoIncrementValue(),
+            isCreated: true,
+            message: `Subtopic created!`
+        };
     }
 
     /**
@@ -108,7 +118,12 @@ class SubTopicHandler {
     async fetchAllSubTopic(topicId) {
         const isTopicIdExists = await this.verifyTopicId(topicId);
 
-        if (!isTopicIdExists) return { isFetched: false, data: null };
+        if (!isTopicIdExists) return {
+            isTopicIdExists: Boolean(isTopicIdExists),
+            isFetched: false,
+            data: null,
+            message: 'Topics could not be fetched'
+        };
 
         const subTopicTable = await this._table();
 
@@ -122,7 +137,12 @@ class SubTopicHandler {
 
         const dataJson = subTopicCursor.fetchAll().map(this.formatJson(columns));
 
-        return { isFetched: true, data: dataJson };
+        return {
+            isTopicIdExists: Boolean(isTopicIdExists),
+            isFetched: true,
+            data: dataJson,
+            message: 'Topics fetched!'
+        };
     }
 
     /**
