@@ -1,4 +1,8 @@
-const { signIn, signUp, signOut, createTopic, fetchTopic } = require('./Path/PathResolver');
+const {
+    signIn, signUp, signOut,
+    createTopic, fetchTopic,
+    fetchSubTopic, createSubTopic
+} = require('./Path/PathResolver');
 
 const { sessionValidation } = require('./Middleware/Middleware');
 
@@ -30,12 +34,24 @@ class ServerPathInitilizer {
         this._serverApp.get('/fetch/topic', sessionValidation, fetchTopic);
     }
 
+    createSubTopic() {
+        this._serverApp.post('/create/subTopic', sessionValidation, createSubTopic);
+    }
+
+    fetchSubTopic() {
+        this._serverApp.get('/fetch/subTopic', sessionValidation, fetchSubTopic);
+    }
+
     _init() {
         this.signIn();
         this.signUp();
         this.signOut();
+
         this.createTopic();
         this.fetchTopic();
+
+        this.createSubTopic();
+        this.fetchSubTopic();
     }
 
 

@@ -3,6 +3,27 @@ const { GeoUserHandler } = require('../../../database/table/GeoUserHandler/GeoUs
 const { UserNotFoundException, InvalidCredentials } = require('../../../database/table/GeoUserHandler/GeoUserHandlerException/GeoUserHandlerException');
 const { UnknownException } = require('../../../database/table/GlobalDatabaseTableHandlerException/UnknownException');
 
+/**
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * 
+ * 
+ * coordinate in location is optional. it needs to passed if geoPointPlusCode is not passed
+ * req body:{
+ * useraname: ''
+ * password: ''
+ * location:{
+ * geoPointPlusCode: plus code of coordinate
+ * coordinate:{
+ * lat: lattitude
+ * lon: longitude
+ * }
+ * }
+ * }
+ * 
+ * @returns 
+ */
 async function signIn(req, res) {
     const info = req.body;
     console.log(info.location);

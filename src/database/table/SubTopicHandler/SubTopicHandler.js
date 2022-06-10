@@ -113,7 +113,7 @@ class SubTopicHandler {
         const subTopicTable = await this._table();
 
         const subTopicCursor = await subTopicTable
-            .select('sub_topic_id', 'sub_topic_title', 'sub_topic_description')
+            .select('topic_id', 'sub_topic_id', 'sub_topic_title', 'sub_topic_description')
             .where('topic_id = :topicId')
             .bind('topicId', topicId)
             .execute();
@@ -170,8 +170,10 @@ class SubTopicHandler {
     }
 }
 
-//debug code
+module.exports.SubTopicHandler = SubTopicHandler;
 
+//debug code
+/*
 let subTopicHandler;
 
 subTopicHandler = new SubTopicHandler();
@@ -179,7 +181,7 @@ subTopicHandler = new SubTopicHandler();
 let subTopicId = 0;
 let topicId = 2;
 
-/*
+
 subTopicHandler.createSubTopic(topicId, 'hello world', 'lasjafsdllasjdf;asjd;f')
     .then(async (res) => {
         console.debug(`TopicId: ${topicId}: - Is Subtopic created ${res.isCreated}`);
