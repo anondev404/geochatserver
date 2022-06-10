@@ -210,7 +210,7 @@ subTopicHandler.createSubTopic(topicId, 'hello world', 'lasjafsdllasjdf;asjd;f')
     });
 
 
-subTopicHandler.isSubTopicExists(subTopicId).then(async (id) => {
+subTopicHandler.isSubTopicExists(subTopicId).then(async (id) => { 
     if (id) {
         console.log(`SubTopic exists with id = ${id}`);
     } else {
