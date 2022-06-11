@@ -84,10 +84,14 @@ class GeoUserHandler {
     async validateUser(username, password) {
         //TODO: password accepted as clear text
 
+        console.log([{
+            username: username,
+            password: password
+        }])
         let userId;
         let usernameRowResult;
         let geoUserTable = await this._table();
-       
+
 
         try { userId = await this.getUserId(username); }
         catch (err) {
@@ -96,9 +100,9 @@ class GeoUserHandler {
                 throw err;
             }
         }
-        
+
         try {
-            
+
             const usernameCursor = await geoUserTable
                 .select('username')
                 .where('user_id = :userid and password = :password')
@@ -108,7 +112,7 @@ class GeoUserHandler {
 
             //gets the first result row
             usernameRowResult = await usernameCursor.fetchOne();
-            
+
         } catch (err) {
             console.log(err);
 

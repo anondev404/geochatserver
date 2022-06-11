@@ -14,7 +14,7 @@ class ServerPathInitilizer {
     }
 
     signIn() {
-        this._serverApp.get('/signIn', signIn);
+        this._serverApp.post('/signIn', signIn);
     }
 
 

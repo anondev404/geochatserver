@@ -4,8 +4,8 @@ class UnknownException extends Error {
     _err;
 
     constructor(err) {
-        this._err = err;
         super();
+        this._err = err;
     }
 }
 

@@ -26,7 +26,9 @@ const { UnknownException } = require('../../../database/table/GlobalDatabaseTabl
  */
 async function signIn(req, res) {
     const info = req.body;
-    console.log(info.location);
+
+    console.log(info);
+    
     try {
         const geoUserHandler = GeoUserHandler.getHandler();
 
