@@ -129,14 +129,14 @@ class SubTopicMetaDiscussHandler {
             return resFormat;
         }
 
-        console.table([{
+        /*console.table([{
             class: SubTopicMetaDiscussHandler.name,
             method: this.createDiscussion.name,
             subTopicId: subTopicId,
             senderUsername: senderUsername,
             isSubTopicExists: isSubTopicExists,
             senderUserId: senderUserId,
-        }]);
+        }]);*/
 
 
         const session = await this.getSession();
@@ -187,6 +187,8 @@ class SubTopicMetaDiscussHandler {
 
         const metaDiscussCursor = await metaDiscussTable
             .select('meta_discuss_id', 'sub_topic_id', 'sender_id', 'message', 'message_timestamp')
+            .where('sub_topic_id = :subTopicId')
+            .bind('subTopicId', subTopicId)
             .execute();
 
         const columns = metaDiscussCursor.getColumns();

@@ -39,7 +39,7 @@ class ServerPathInitilizer {
     }
 
     fetchSubTopic() {
-        this._serverApp.get('/fetch/subTopic', sessionValidation, fetchSubTopic);
+        this._serverApp.post('/fetch/subTopic', sessionValidation, fetchSubTopic);
     }
 
     createSubTopicMetaDiscussion() {
@@ -47,7 +47,7 @@ class ServerPathInitilizer {
     }
 
     fetchSubTopicMetaDiscussion() {
-        this._serverApp.get('/fetch/subTopicMetaDiscussion', sessionValidation, fetchSubTopicMetaDiscussion);
+        this._serverApp.post('/fetch/subTopicMetaDiscussion', sessionValidation, fetchSubTopicMetaDiscussion);
     }
 
     _init() {

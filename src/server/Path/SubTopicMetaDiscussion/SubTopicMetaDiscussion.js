@@ -16,10 +16,11 @@ async function createSubTopicMetaDiscussion(req, res) {
 
     const subTopicMetaDiscussHandler = new SubTopicMetaDiscussHandler();
 
+    //console.table([{ username: req.session }])
     const result = await subTopicMetaDiscussHandler
         .createDiscussion(
             info.sub_topic_id,
-            info.username,
+            req.session.username,
             info.message);
 
     subTopicMetaDiscussHandler.release();
@@ -51,6 +52,7 @@ async function fetchSubTopicMetaDiscussion(req, res) {
 
     const subTopicMetaDiscussHandler = new SubTopicMetaDiscussHandler();
 
+    //console.table([{ sub_topic_id: info.sub_topic_id}])
     const result = await subTopicMetaDiscussHandler.fetchAllMetaDiscussion(info.sub_topic_id);
 
     subTopicMetaDiscussHandler.release();
