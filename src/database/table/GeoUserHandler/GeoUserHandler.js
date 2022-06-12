@@ -70,6 +70,29 @@ class GeoUserHandler {
         }
     }
 
+    async getUsername(userId) {
+        const geoUserTable = await this._table();
+
+        const useridCursor = await geoUserTable
+            .select('username')
+            .where('user_id = :userId')
+            .bind('userId', userId)
+            .execute();
+
+        //gets the first result row
+        const useridResultRow = await useridCursor.fetchOne();
+
+        if (useridResultRow) {
+            //user id
+            return useridResultRow[0];
+        } else {
+
+            //user id row does not exists
+            throw new UserNotFoundException();
+            //return null;
+        }
+    }
+
     async getUserId(username) {
         const userId = await this.exits(username);
         if (userId) {
