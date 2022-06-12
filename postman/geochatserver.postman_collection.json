@@ -40,7 +40,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"sub_topic_id\": 2\r\n}",
+					"raw": "{\r\n    \"sub_topic_id\": 1\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -69,7 +69,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"sub_topic_id\": 2,\r\n    \"message\": \"message for sub_topic_id 2\"\r\n}",
+					"raw": "{\r\n    \"sub_topic_id\": 1,\r\n    \"message\": \"message in sub_topic_id: 1\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -206,7 +206,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"topic_id\": 2,\r\n    \"sub_topic_title\": \"Enter your subtopic title here\",\r\n    \"sub_topic_description\": \"Enter your subtopic description\"\r\n}",
+					"raw": "{\r\n    \"topic_id\": 1,\r\n    \"sub_topic_title\": \"Enter your subtopic title here\",\r\n    \"sub_topic_description\": \"Enter your subtopic description\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -230,11 +230,8 @@
 		},
 		{
 			"name": "fetch_sub_topic",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
 			"request": {
-				"method": "GET",
+				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
