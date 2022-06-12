@@ -18,7 +18,7 @@ class _DatabaseClientHandler {
             {
                 pooling: {
                     enabled: true,
-                    maxSize: 25
+                    maxSize: 3000
                 }
             }
         );
