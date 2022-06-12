@@ -35,7 +35,7 @@ async function fetchUsernameByUserId(httpRequest, httpResponse) {
         })
     } finally {
         if (handler) {
-            await handler.realse();
+            await handler.release();
         }
     }
 }
