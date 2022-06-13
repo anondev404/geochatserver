@@ -74,6 +74,7 @@ class TopicHandler {
     async settleGeoPointPLusCode(geoPointPlusCode, coordinate) {
         let isPlusCodeExists = null;
         let settledPlusCode = null;
+        console.debug('settling geopoint plus_code...');
 
         if (geoPointPlusCode) {
             isPlusCodeExists = await GeoPointHandler.checkIfGeoPointExistsWithPlusCode(geoPointPlusCode);
@@ -83,6 +84,7 @@ class TopicHandler {
         if (!isPlusCodeExists) {
             if (coordinate) {
                 if (coordinate.lat > 0 && coordinate.lon > 0) {
+                    console.debug(`settling using coordinate lat = ${coordinate.lat}, lon = ${coordinate.lon}`);
 
                     const dHandler = await this._getDatabaseHandler();
                     const geoPointHandler = new GeoPointHandler(coordinate.lat, coordinate.lon, dHandler);
@@ -90,10 +92,13 @@ class TopicHandler {
 
                     settledPlusCode = nearestCoor[0];
 
-                    console.log(`TopicHandler: --> settleGeoPointPLusCode: Creating plus_code form coordinates [${coordinate.lat}, ${coordinate.lon}]`);
+
+
+                    console.log(`[lat = ${coordinate.lat}, lon = ${coordinate.lon}] plus_code = ${settledPlusCode}`);
+
                 }
             } else {
-                console.log('TopicHandler: settleGeoPointPLusCode ---> PLUS_CODE Could not be settled');
+                console.log(`geolocation invalid plus_code = failure`);
 
                 //topic could not be created as plusCode did not match in database
                 //lattitude and longitutde is not supplied either

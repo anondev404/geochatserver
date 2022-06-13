@@ -126,9 +126,8 @@ class GeoPointHandler {
             return -1;
         }
 
-        console.log(`nearestCoor ---> ${nearestCoor}`);
-
         if (nearestCoor === -1) {
+            console.log(`lat = ${this._lattitude}, lon = ${this._longitude} in range with geo_point ${nearestCoor}`);
             const session = await this.getSession();
             try {
                 const geoPointTable = await this._table();
@@ -153,6 +152,7 @@ class GeoPointHandler {
         }
         else {
             if (nearestCoor) {
+                console.log(`lat = ${this._lattitude}, lon = ${this._longitude} in range with geo_point ${nearestCoor}`);
 
                 //already in range with coordinate nearestCoor[0] plus code, nearestCoor[1] lat, nearestCoor[2] lon
                 return nearestCoor;
@@ -187,19 +187,19 @@ class GeoPointHandler {
                 //if database is empty the coor fetched is undefined
                 //this check therefore protects against that
                 if (coor) {
-                    console.log(`\ncoordinate --> ${coor}`);
+                    console.log(`fetching nearest coordinates to lat = ${this._lattitude}, lon = ${this._longitude}`);
 
                     isInRange = this.checkIfCoorInRange(this._lattitude, this._longitude, coor[1], coor[2]);
 
-                    console.log(`is coordinate range ---> ${isInRange}\n`);
-
                     if (isInRange) {
-                        console.log(`[${this._lattitude}, ${this._longitude}] in range with [${coor}]`);
+                        console.log(`located nearest geo_point of [${this._lattitude}, ${this._longitude}] ------- ${coor} (resolved distance: ${isInRange})`);
 
                         //coor(coor[0] plus code, coor[1] lat, coor[2] lon) returned 
                         //if given coordinate is in _range with no other coordinates in database
                         //then it is safe to add in database
                         return coor;
+                    } else {
+
                     }
 
                 } else {
@@ -207,7 +207,7 @@ class GeoPointHandler {
                 }
             }
 
-            console.log('lat %d lon %d is not in range with no other coordinate', this._lattitude, this._longitude);
+            console.log(`new geo_point discovered: lat = ${this._lattitude}, lon = ${this._longitude}`);
 
             //given coordinate(this._lattitude, this._longitude) is range with other coordinate in database
             return -1;
