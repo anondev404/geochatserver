@@ -81,7 +81,7 @@ class GeoPointHandler {
 
         const dis = this.distanceInMetersBtwCoordinates(lat1, lon1, lat2, lon2);
 
-        console.log(`distance ---> ${dis}`);
+        console.log(`coor_a: [${lat1}, ${lon1}] distance to coor_b:  [${lat2}, ${lon2}] = ${dis} meters`);
 
         if (dis > _range) {
             return false;
