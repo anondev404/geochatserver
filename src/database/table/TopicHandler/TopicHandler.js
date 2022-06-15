@@ -253,9 +253,9 @@ class TopicHandler {
 module.exports.TopicHandler = TopicHandler;
 
 //debug code
-
-let topicHandler;
 /*
+let topicHandler;
+
 const geoPointHandler = new GeoPointHandler(22.365239488966406, 87.32984310749357);
 
 geoPointHandler.getNearestCoordinate().then(async (nearestCoor) => {

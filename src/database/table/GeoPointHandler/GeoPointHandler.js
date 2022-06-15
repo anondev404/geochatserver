@@ -112,55 +112,6 @@ class GeoPointHandler {
         return false;
     }
 
-
-    async createGeoPoint() {
-        //console.log(this.getPlusCode());
-        const dHandler = await this._getDatabaseHandler();
-
-        let nearestCoor;
-
-        try {
-            nearestCoor = await this.getNearestCoordinate();
-        }
-        catch (err) {
-            return -1;
-        }
-
-        if (nearestCoor === -1) {
-            console.log(`lat = ${this._lattitude}, lon = ${this._longitude} in range with geo_point ${nearestCoor}`);
-            const session = await this.getSession();
-            try {
-                const geoPointTable = await this._table();
-                await session.startTransaction();
-
-                const sqlRes = await geoPointTable
-                    .insert('plus_code', 'lattitude', 'longitude')
-                    .values(this.getPlusCode(), this._lattitude, this._longitude)
-                    .execute();
-
-
-                await session.commit();
-
-                return [this.getPlusCode(), this._lattitude, this._longitude];
-            } catch (err) {
-                console.log(err);
-
-                await session.rollback();
-
-                return -1;
-            }
-        }
-        else {
-            if (nearestCoor) {
-                console.log(`lat = ${this._lattitude}, lon = ${this._longitude} in range with geo_point ${nearestCoor}`);
-
-                //already in range with coordinate nearestCoor[0] plus code, nearestCoor[1] lat, nearestCoor[2] lon
-                return nearestCoor;
-            }
-        }
-    }
-
-
     async getNearestCoordinate() {
         //TODO: close database connection
         //console.log(this.getPlusCode());
@@ -197,9 +148,10 @@ class GeoPointHandler {
                         //coor(coor[0] plus code, coor[1] lat, coor[2] lon) returned 
                         //if given coordinate is in _range with no other coordinates in database
                         //then it is safe to add in database
-                        return coor;
-                    } else {
-
+                        return {
+                            isInRange: true,
+                            nearestCoor: coor
+                        };
                     }
 
                 } else {
@@ -210,11 +162,59 @@ class GeoPointHandler {
             console.log(`new geo_point discovered: lat = ${this._lattitude}, lon = ${this._longitude}`);
 
             //given coordinate(this._lattitude, this._longitude) is range with other coordinate in database
-            return -1;
+            return {
+                isInRange: false,
+                nearestCoor: null
+            };
         } catch (err) {
             console.log(err);
 
             throw err;
+        }
+    }
+
+
+    async createGeoPoint() {
+        //console.log(this.getPlusCode());
+        const dHandler = await this._getDatabaseHandler();
+
+        let coor;
+
+        try {
+            coor = await this.getNearestCoordinate();
+        }
+        catch (err) {
+            return -1;
+        }
+
+        if (coor.isInRange) {
+            console.log(`lat = ${this._lattitude}, lon = ${this._longitude} in range with geo_point ${coor.nearestCoor}`);
+
+            //already in range with coordinate nearestCoor[0] plus code, nearestCoor[1] lat, nearestCoor[2] lon
+            return coor.nearestCoor;
+        } else {
+            console.log(`lat = ${this._lattitude}, lon = ${this._longitude} is not in range with any-existing geo_point`);
+            const session = await this.getSession();
+            try {
+                const geoPointTable = await this._table();
+                await session.startTransaction();
+
+                const sqlRes = await geoPointTable
+                    .insert('plus_code', 'lattitude', 'longitude')
+                    .values(this.getPlusCode(), this._lattitude, this._longitude)
+                    .execute();
+
+
+                await session.commit();
+
+                return [this.getPlusCode(), this._lattitude, this._longitude];
+            } catch (err) {
+                console.log(err);
+
+                await session.rollback();
+
+                return -1;
+            }
         }
     }
 
